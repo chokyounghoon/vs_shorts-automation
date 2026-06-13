@@ -1,0 +1,16 @@
+name = "vs-shorts-automation"
+main = "src/index.js"
+compatibility_date = "2024-03-20"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vs-automation-db"
+database_id = "d6d19bc4-96c1-4055-875d-46809c1a82c3"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "vs-shorts-bucket"
+
+[triggers]
+crons = ["0 0 * * *"] # 매일 자정 작동 (Cron Trigger)

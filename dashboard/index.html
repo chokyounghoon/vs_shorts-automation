@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VS Shorts Automation Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="glass-header">
+            <h1>VS Shorts Automation ⚡️</h1>
+            <p>Hot Issues Management & Auto-Publishing Dashboard</p>
+        </header>
+        
+        <main>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table id="issuesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Status</th>
+                                <th>Title</th>
+                                <th>Source</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuesBody">
+                            <!-- JS를 통해 동적 렌더링 됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <p>Loading hot issues...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
