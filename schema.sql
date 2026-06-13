@@ -26,3 +26,10 @@ CREATE TABLE IF NOT EXISTS app_settings (
 );
 
 INSERT OR IGNORE INTO app_settings (key, value) VALUES ('schedule_time', '09:00');
+
+-- YouTube OAuth Tokens
+CREATE TABLE IF NOT EXISTS youtube_tokens (
+    id INTEGER PRIMARY KEY CHECK (id = 1), -- 단일 채널 연동이므로 id=1 하나만 사용
+    refresh_token TEXT NOT NULL,
+    updated_at DATETIME DEFAULT (datetime('now', 'localtime'))
+);

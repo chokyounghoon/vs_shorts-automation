@@ -1,196 +1,193 @@
-const API_BASE_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') 
-    ? "http://localhost:8787" 
-    : "https://vs-shorts-automation.khcho0421.workers.dev";
+const API_BASE_URL = (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') || window.location.protocol === 'file:') 
+    ? "https://vs-shorts-automation.khcho0421.workers.dev" // 로컬에서 테스트할 때도 워커(원격) API를 찌르도록 변경 (개발 편의성)
+    : "https://vs-shorts-automation.khcho0421.workers.dev"; // Pages 배포 시 워커(백엔드) 주소
 
 let issuesData = [];
 let selectedIssue = null;
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadIssues();
-});
+document.addEventListener("DOMContentLoaded", loadIssues);
 
-// Helper: Show/Hide Loading
-function setLoading(show) {
-    const el = document.getElementById('loadingIndicator');
-    if (show) {
-        el.classList.remove('hidden');
-    } else {
-        el.classList.add('hidden');
-    }
-}
-
-// 1. [가져오기] 버튼 1 로직
-window.fetchNewIssues = async function() {
+async function fetchNewIssues() {
     const btn = document.getElementById('btnFetch');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<div class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div> 가져오는 중...`;
-    
+    const orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = 'Fetching...';
     try {
-        const res = await fetch(`${API_BASE_URL}/api/fetch-issues`, { method: "POST" });
-        if (!res.ok) throw new Error("Fetch failed");
-        
-        await loadIssues(); // 테이블 리로드
-        
-        alert("오늘의 핫이슈 VS 데이터를 성공적으로 가져왔습니다!");
-    } catch (e) {
-        alert("데이터를 가져오는 데 실패했습니다.");
-        console.error(e);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
+        const res = await fetch(`${API_BASE_URL}/api/fetch-issues`, { method: 'POST' });
+        if(!res.ok) throw new Error("Fetch failed");
+        await loadIssues();
+        alert("핫이슈를 생성했습니다!");
+    } catch (e) { alert("데이터를 생성하는 데 실패했습니다. 원격 데이터베이스 스키마가 업데이트되었는지 확인해 주세요."); }
+    btn.disabled = false; btn.innerHTML = orig;
 }
 
-// 테이블 데이터 로드
 async function loadIssues() {
-    setLoading(true);
+    document.getElementById('loadingIndicator').classList.remove('hidden');
     try {
         const res = await fetch(`${API_BASE_URL}/api/issues`);
-        if (!res.ok) throw new Error("Load failed");
-        
         issuesData = await res.json();
         renderTable();
-    } catch (e) {
-        document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">데이터 로드 실패. API 연결을 확인하세요.</td></tr>`;
     } finally {
-        setLoading(false);
+        document.getElementById('loadingIndicator').classList.add('hidden');
     }
 }
 
 function renderTable() {
     const tbody = document.getElementById('tableBody');
-    if (issuesData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500">생성된 데이터가 없습니다. 상단 버튼을 눌러 가져오세요.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = issuesData.map(item => `
-        <tr class="cursor-pointer hover:bg-slate-800/80 transition-colors ${selectedIssue?.id === item.id ? 'row-selected' : ''}" onclick="selectRow(${item.id})">
-            <td class="p-4 text-slate-400">${item.analyze_date}</td>
-            <td class="p-4"><span class="bg-white/10 px-2.5 py-1 rounded-md text-xs border border-white/5 shadow-sm">${item.category}</span></td>
-            <td class="p-4 font-medium tracking-wide">
-                <span class="text-blue-400">${item.keyword_a}</span>
-                <span class="text-slate-600 text-[10px] mx-1.5 uppercase font-bold">vs</span>
-                <span class="text-red-400">${item.keyword_b}</span>
-            </td>
-            <td class="p-4">
-                <span class="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold shadow-sm ${
-                    item.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                    item.status === 'PROCESSING' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                    item.status === 'COMPLETED' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                }">${item.status}</span>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = issuesData.map(function(item) {
+        const isSelected = selectedIssue?.id === item.id ? 'row-selected' : '';
+        const statusClass = item.status === 'COMPLETED' ? 'text-green-500 bg-green-500/10' : (item.status === 'FAILED' ? 'text-red-500 bg-red-500/10' : 'text-yellow-500 bg-yellow-500/10');
+        return '<tr class="cursor-pointer hover:bg-slate-800/80 transition-colors ' + isSelected + '" onclick="selectRow(' + item.id + ')">' +
+            '<td class="p-4 text-slate-400">' + item.analyze_date + '</td>' +
+            '<td class="p-4"><span class="bg-white/10 px-2.5 py-1 rounded-md text-xs border border-white/5">' + item.category + '</span></td>' +
+            '<td class="p-4 font-medium"><span class="text-blue-400">' + item.keyword_a + '</span><span class="mx-1 text-xs">vs</span><span class="text-red-400">' + item.keyword_b + '</span></td>' +
+            '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ' + statusClass + '">' + item.status + '</span></td>' +
+        '</tr>';
+    }).join('');
 }
 
-// 행(Row) 클릭 처리 로직
 window.selectRow = function(id) {
     selectedIssue = issuesData.find(i => i.id === id);
-    renderTable(); // 하이라이트 반영
-    
-    // 선택 시 [미리보기] 버튼 활성화
+    renderTable();
     document.getElementById('btnPreview').disabled = false;
-    
-    // [발행] 버튼은 PENDING 상태일 때만 활성화 (이미 완료된 건 막기 위함)
-    document.getElementById('btnPublish').disabled = selectedIssue.status !== 'PENDING';
+    document.getElementById('btnPublishBrowser').disabled = selectedIssue.status !== 'PENDING';
+    document.getElementById('btnPublishMock').disabled = selectedIssue.status !== 'PENDING';
 }
 
-// 2. [결과물 보기] 버튼 2 로직
 window.renderPreview = function() {
     if (!selectedIssue) return;
+    document.getElementById('emptyPreview').classList.add('hidden');
+    document.getElementById('activePreview').classList.remove('hidden');
     
-    const emptyPreview = document.getElementById('emptyPreview');
-    const activePreview = document.getElementById('activePreview');
-    
-    // 초기화 및 페이드인 효과를 위해 클래스 토글
-    emptyPreview.style.opacity = '0';
-    setTimeout(() => {
-        emptyPreview.classList.add('hidden');
-        activePreview.classList.remove('hidden');
-        
-        // 데이터 주입
-        document.getElementById('previewCategory').innerText = selectedIssue.category;
-        document.getElementById('previewA').innerText = selectedIssue.keyword_a;
-        document.getElementById('previewB').innerText = selectedIssue.keyword_b;
-        document.getElementById('previewTitle').innerText = selectedIssue.title;
-
-        // 수치 포맷팅 (콤마)
-        const formatNumber = num => new Intl.NumberFormat().format(num);
-        
-        // 애니메이션을 위한 값 세팅 (0 -> Target)
-        let valA = 0;
-        let valB = 0;
-        const targetA = selectedIssue.metric_a_value;
-        const targetB = selectedIssue.metric_b_value;
-
-        // 비율 계산 (Total이 0일 경우 50:50 방어 로직)
-        const total = targetA + targetB;
-        const pctA = total === 0 ? 50 : Math.round((targetA / total) * 100);
-        const pctB = 100 - pctA;
-
-        // 게이지 바 애니메이션 트리거
-        document.getElementById('barA').style.width = '0%';
-        document.getElementById('barB').style.width = '0%';
-        
-        // 카운트업 타이머
-        const interval = setInterval(() => {
-            valA += Math.ceil(targetA / 30);
-            valB += Math.ceil(targetB / 30);
-            
-            if (valA >= targetA) valA = targetA;
-            if (valB >= targetB) valB = targetB;
-            
-            document.getElementById('valA').innerText = formatNumber(valA);
-            document.getElementById('valB').innerText = formatNumber(valB);
-            
-            if (valA >= targetA && valB >= targetB) clearInterval(interval);
-        }, 30);
-        
-        setTimeout(() => {
-            document.getElementById('barA').style.width = `${pctA}%`;
-            document.getElementById('barB').style.width = `${pctB}%`;
-        }, 50);
-
-    }, 300);
+    _injectPreviewData();
+    _triggerAnimation();
 }
 
-// 3. [유튜브 발행] 버튼 3 로직
-window.publishYoutube = async function() {
-    if (!selectedIssue) return;
-    
-    const btn = document.getElementById('btnPublish');
-    btn.disabled = true;
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = `<div class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div> 유튜브 업로드 진행 중...`;
+function _injectPreviewData() {
+    document.getElementById('previewCategory').innerText = selectedIssue.category;
+    document.getElementById('previewA').innerText = selectedIssue.keyword_a;
+    document.getElementById('previewB').innerText = selectedIssue.keyword_b;
+    document.getElementById('previewTitle').innerText = selectedIssue.title;
+    document.getElementById('barA').style.width = '0%';
+    document.getElementById('barB').style.width = '0%';
+    document.getElementById('valA').innerText = '0';
+    document.getElementById('valB').innerText = '0';
+}
 
+function _triggerAnimation() {
+    const tA = selectedIssue.metric_a_value, tB = selectedIssue.metric_b_value;
+    const pctA = (tA + tB === 0) ? 50 : Math.round((tA / (tA+tB)) * 100);
+    
+    setTimeout(() => {
+        document.getElementById('barA').style.width = pctA + '%';
+        document.getElementById('barB').style.width = (100 - pctA) + '%';
+        document.getElementById('valA').innerText = new Intl.NumberFormat().format(tA);
+        document.getElementById('valB').innerText = new Intl.NumberFormat().format(tB);
+    }, 100);
+}
+
+// --- 버튼 1: 기존 서버 렌더링(가상 모사) 로직 ---
+window.publishYoutubeMock = async function() {
+    if (!selectedIssue) return;
+    const btn = document.getElementById('btnPublishMock');
+    btn.disabled = true; btn.innerHTML = '대기중...';
     try {
-        const res = await fetch(`${API_BASE_URL}/api/publish-youtube`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+        const res = await fetch(`${API_BASE_URL}/api/publish-youtube-mock`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ issueId: selectedIssue.id })
         });
+        const data = await res.json();
+        if(res.ok) {
+            alert("가상 모사 발행 파이프라인이 시작되었습니다! 백엔드에서 시뮬레이션 중입니다.");
+            selectedIssue.status = 'PROCESSING'; renderTable();
+            setTimeout(loadIssues, 6500);
+        } else {
+            alert("오류: " + (data.error || "알 수 없는 오류"));
+            btn.disabled = false; btn.innerHTML = '서버 가상 모사';
+        }
+    } catch(e) { alert("요청 실패"); btn.disabled = false; btn.innerHTML = '서버 가상 모사'; }
+}
+
+// --- 버튼 2: 브라우저 DOM 녹화 로직 (방법 A) ---
+async function recordCanvas() {
+    return new Promise((resolve, reject) => {
+        const previewEl = document.getElementById('previewCard');
+        const canvas = document.createElement('canvas');
+        canvas.width = previewEl.offsetWidth;
+        canvas.height = previewEl.offsetHeight;
+        const ctx = canvas.getContext('2d');
         
-        if (!res.ok) throw new Error("Publish trigger failed");
+        const stream = canvas.captureStream(10); // 10 fps
+        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        const chunks = [];
         
-        alert("유튜브 업로드 파이프라인이 시작되었습니다!\n(현재 백그라운드 인코딩 및 API 연동 모사 진행 중)\n약 6초 뒤 화면이 갱신됩니다.");
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+            resolve(new Blob(chunks, { type: 'video/webm' }));
+        };
         
-        // 임시로 테이블을 PROCESSING 처럼 보이게 UI만 변경
-        selectedIssue.status = 'PROCESSING';
-        renderTable();
+        recorder.start();
         
-        // 실제 Worker의 setTimeout 딜레이(4s+2s)에 맞춰서 리로드
+        let isRecording = true;
+        const drawLoop = async () => {
+            if (!isRecording) return;
+            try {
+                const tempCanvas = await html2canvas(previewEl, { 
+                    backgroundColor: '#000000', scale: 1, useCORS: true 
+                });
+                ctx.drawImage(tempCanvas, 0, 0);
+            } catch(e) {}
+            if (isRecording) setTimeout(drawLoop, 100);
+        };
+        
+        drawLoop();
+        
         setTimeout(() => {
-            loadIssues();
-            btn.innerHTML = originalHtml;
-            // 리로드 후 버튼 상태는 loadIssues() -> selectRow() 유지 로직이나 renderTable()에서 초기화됨
-        }, 6500);
+            isRecording = false;
+            recorder.stop();
+        }, 5000);
+    });
+}
+
+window.publishYoutubeBrowser = async function() {
+    if (!selectedIssue) return;
+    const btn = document.getElementById('btnPublishBrowser');
+    btn.disabled = true; 
+    btn.innerHTML = '브라우저 렌더링 중... (창 유지)';
+
+    try {
+        document.getElementById('emptyPreview').classList.add('hidden');
+        document.getElementById('activePreview').classList.remove('hidden');
+        _injectPreviewData();
+        document.getElementById('recIndicator').classList.remove('hidden');
+
+        _triggerAnimation();
+        const videoBlob = await recordCanvas();
         
-    } catch (e) {
-        alert("유튜브 발행 API 호출에 실패했습니다.");
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-        console.error(e);
+        document.getElementById('recIndicator').classList.add('hidden');
+        btn.innerHTML = '실제 업로드 중...';
+
+        const formData = new FormData();
+        formData.append('issueId', selectedIssue.id);
+        formData.append('title', selectedIssue.title);
+        formData.append('videoFile', videoBlob, 'shorts.webm');
+
+        const res = await fetch(`${API_BASE_URL}/api/publish-youtube`, {
+            method: 'POST',
+            body: formData 
+        });
+        const data = await res.json();
+        
+        if(res.ok) {
+            alert("실제 유튜브 업로드 파이프라인이 성공적으로 완료되었습니다!");
+            selectedIssue.status = 'COMPLETED'; 
+            renderTable();
+        } else {
+            alert("업로드 오류: " + (data.error || "알 수 없는 오류"));
+            btn.disabled = false; btn.innerHTML = '브라우저 녹화 (방법 A)';
+        }
+    } catch(e) { 
+        alert("요청 실패: " + e.message); 
+        btn.disabled = false; btn.innerHTML = '브라우저 녹화 (방법 A)'; 
+        document.getElementById('recIndicator').classList.add('hidden');
     }
 }
