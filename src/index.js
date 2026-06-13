@@ -3,11 +3,9 @@ export default {
 	async scheduled(event, env, ctx) {
 		console.log(`[Cron Trigger] Scheduled event triggered at ${event.cron}`);
 		
-		// DB에서 설정된 스케줄 시간 가져오기 (기본값 09:00)
 		const setting = await env.DB.prepare("SELECT value FROM app_settings WHERE key = 'schedule_time'").first();
-		const targetTime = setting ? setting.value : "09:00"; // "HH:MM" 형식
+		const targetTime = setting ? setting.value : "09:00"; 
 
-		// 현재 시간을 한국 시간(KST) 기준으로 구하기
 		const now = new Date();
 		const kstOffset = 9 * 60 * 60 * 1000;
 		const kstDate = new Date(now.getTime() + kstOffset);
@@ -15,22 +13,17 @@ export default {
 		const currentMinute = kstDate.getUTCMinutes().toString().padStart(2, '0');
 		const currentTime = `${currentHour}:${currentMinute}`;
 
-		console.log(`Current Time (KST): ${currentTime}, Target Time: ${targetTime}`);
-
-		// 현재 시간이 설정된 시간과 정확히 일치할 때만 실행
 		if (currentTime === targetTime) {
 			console.log("Time matched! Executing daily scraping...");
-			ctx.waitUntil(this.fetchAndProcessDailyIssues(env));
-		} else {
-			console.log("Time not matched. Skipping execution.");
+			ctx.waitUntil(this.generateMockIssues(env));
 		}
 	},
 
-	// 진입점 B (HTTP POST API): 프론트엔드 대시보드의 '발행하기' 호출 처리
+	// 진입점 B (HTTP API)
 	async fetch(request, env, ctx) {
 		const url = new URL(request.url);
 
-		// CORS Preflight 요청 처리
+		// CORS Preflight 처리
 		if (request.method === "OPTIONS") {
 			return new Response(null, {
 				status: 204,
@@ -42,229 +35,137 @@ export default {
 			});
 		}
 
-		if (request.method === "POST" && url.pathname === "/api/publish") {
+		// 공통 응답 헤더
+		const corsHeaders = { 
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "*"
+		};
+
+		// 1. [가져오기 버튼] - 새로운 VS 주제 생성 (POST /api/fetch-issues)
+		if (request.method === "POST" && url.pathname === "/api/fetch-issues") {
+			try {
+				await this.generateMockIssues(env);
+				// 생성 후 최신 리스트 반환
+				const { results } = await env.DB.prepare("SELECT * FROM hot_issues ORDER BY created_at DESC LIMIT 50").all();
+				return new Response(JSON.stringify({ success: true, data: results }), { status: 200, headers: corsHeaders });
+			} catch (error) {
+				return new Response(JSON.stringify({ error: "Failed to fetch and generate issues" }), { status: 500, headers: corsHeaders });
+			}
+		}
+
+		// 2. [조회 API] - 대시보드 리스트 로드용 (GET /api/issues)
+		if (request.method === "GET" && url.pathname === "/api/issues") {
+			try {
+				const { results } = await env.DB.prepare("SELECT * FROM hot_issues ORDER BY created_at DESC LIMIT 50").all();
+				return new Response(JSON.stringify(results), { status: 200, headers: corsHeaders });
+			} catch (error) {
+				return new Response(JSON.stringify({ error: "Failed to fetch issues" }), { status: 500, headers: corsHeaders });
+			}
+		}
+
+		// 3. [유튜브 발행 버튼] - 비디오 렌더링 & 유튜브 업로드 모방 (POST /api/publish-youtube)
+		if (request.method === "POST" && url.pathname === "/api/publish-youtube") {
 			try {
 				const body = await request.json();
 				const { issueId } = body;
 
 				if (!issueId) {
-					return new Response(JSON.stringify({ error: "issueId is required" }), {
-						status: 400,
-						headers: { "Content-Type": "application/json" }
-					});
+					return new Response(JSON.stringify({ error: "issueId is required" }), { status: 400, headers: corsHeaders });
 				}
 
-				// 비동기 작업(영상 렌더링, R2 업로드, YouTube 발행)을 즉시 큐(Queue)와 유사하게 백그라운드로 넘김
+				// 발행 작업 비동기 처리
 				ctx.waitUntil(this.processPublishing(issueId, env));
 
-				// 클라이언트(프론트엔드)에는 즉각적으로 202 Accepted를 반환
-				return new Response(JSON.stringify({ 
-					message: "Publishing job has been triggered successfully.", 
-					issueId 
-				}), {
-					status: 202,
-					headers: { 
-						"Content-Type": "application/json",
-						"Access-Control-Allow-Origin": "*"
-					}
+				return new Response(JSON.stringify({ message: "Publishing job triggered successfully", issueId }), {
+					status: 202, headers: corsHeaders
 				});
-
 			} catch (error) {
-				return new Response(JSON.stringify({ error: "Invalid request payload." }), {
-					status: 400,
-					headers: { 
-						"Content-Type": "application/json",
-						"Access-Control-Allow-Origin": "*"
-					}
-				});
+				return new Response(JSON.stringify({ error: "Invalid payload" }), { status: 400, headers: corsHeaders });
 			}
 		}
 
-		// /api/settings 엔드포인트: 스케줄 설정 조회
+		// (부가 기능) 스케줄 조회/저장 유지
 		if (request.method === "GET" && url.pathname === "/api/settings") {
-			try {
-				const setting = await env.DB.prepare("SELECT value FROM app_settings WHERE key = 'schedule_time'").first();
-				return new Response(JSON.stringify({ schedule_time: setting ? setting.value : "09:00" }), {
-					status: 200,
-					headers: { 
-						"Content-Type": "application/json",
-						"Access-Control-Allow-Origin": "*"
-					}
-				});
-			} catch (error) {
-				return new Response(JSON.stringify({ error: "Failed to fetch settings" }), {
-					status: 500,
-					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-				});
-			}
+			const setting = await env.DB.prepare("SELECT value FROM app_settings WHERE key = 'schedule_time'").first();
+			return new Response(JSON.stringify({ schedule_time: setting ? setting.value : "09:00" }), { status: 200, headers: corsHeaders });
 		}
-
-		// /api/settings 엔드포인트: 스케줄 설정 저장
 		if (request.method === "POST" && url.pathname === "/api/settings") {
-			try {
-				const { schedule_time } = await request.json();
-				if (!schedule_time || !/^\d{2}:\d{2}$/.test(schedule_time)) {
-					return new Response(JSON.stringify({ error: "Invalid time format (HH:MM)" }), {
-						status: 400,
-						headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-					});
-				}
-
-				await env.DB.prepare(`
-					INSERT INTO app_settings (key, value, updated_at) 
-					VALUES ('schedule_time', ?, datetime('now', 'localtime'))
-					ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
-				`).bind(schedule_time).run();
-
-				return new Response(JSON.stringify({ success: true, schedule_time }), {
-					status: 200,
-					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-				});
-			} catch (error) {
-				return new Response(JSON.stringify({ error: "Failed to save settings" }), {
-					status: 500,
-					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-				});
-			}
+			const { schedule_time } = await request.json();
+			if (!schedule_time) return new Response("Error", { status: 400, headers: corsHeaders });
+			await env.DB.prepare(`
+				INSERT INTO app_settings (key, value, updated_at) VALUES ('schedule_time', ?, datetime('now', 'localtime'))
+				ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+			`).bind(schedule_time).run();
+			return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
 		}
 
-		// /api/trigger 엔드포인트: 스크래퍼 수동 즉시 실행
-		if (request.method === "POST" && url.pathname === "/api/trigger") {
-			try {
-				ctx.waitUntil(this.fetchAndProcessDailyIssues(env));
-				return new Response(JSON.stringify({ message: "Scraping triggered manually." }), {
-					status: 202,
-					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-				});
-			} catch (error) {
-				return new Response(JSON.stringify({ error: "Failed to trigger scraping" }), {
-					status: 500,
-					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-				});
-			}
-		}
-
-		// /api/issues 엔드포인트: 대시보드에서 목록 조회
-		if (request.method === "GET" && url.pathname === "/api/issues") {
-			try {
-				const { results } = await env.DB.prepare("SELECT * FROM hot_issues ORDER BY created_at DESC LIMIT 50").all();
-				return new Response(JSON.stringify(results), {
-					status: 200,
-					headers: { 
-						"Content-Type": "application/json",
-						"Access-Control-Allow-Origin": "*" // 개발 및 테스트를 위한 CORS 허용
-					}
-				});
-			} catch (error) {
-				return new Response(JSON.stringify({ error: "Failed to fetch issues" }), {
-					status: 500,
-					headers: { "Content-Type": "application/json" }
-				});
-			}
-		}
-
-		return new Response(JSON.stringify({ error: "Not Found" }), { 
-			status: 404,
-			headers: { "Content-Type": "application/json" }
-		});
+		return new Response(JSON.stringify({ error: "Not Found" }), { status: 404, headers: corsHeaders });
 	},
 
-	// 진입점 A에서 호출하는 실제 스크래핑 및 DB 적재 로직
-	async fetchAndProcessDailyIssues(env) {
-		try {
-			console.log("Fetching external stock/news data...");
-			// TODO: 실제 API 연동 (예: 주식/뉴스 API)
-			// const res = await fetch("https://api.example.com/finance/news");
-			// const data = await res.json();
-			
-			// 테스트용 모의 데이터
-			const dummyIssue = {
-				analyze_date: new Date().toISOString().split('T')[0],
-				category: "IT/테크",
-				keyword_a: "삼성전자",
-				keyword_b: "SK하이닉스",
+	// 내부 메서드: Gemini API 호출 모방하여 Mock 데이터 3개 생성
+	async generateMockIssues(env) {
+		const today = new Date().toISOString().split('T')[0];
+		
+		const mockDataList = [
+			{
+				analyze_date: today, category: "주식/경제",
+				keyword_a: "삼성전자", keyword_b: "SK하이닉스",
 				title: "[HBM 패권전쟁] 삼성전자 vs SK하이닉스, 과연 승자는?",
-				controversy_score: 85
-			};
+				controversy_score: 85, metric_a_value: 5800000, metric_b_value: 4200000
+			},
+			{
+				analyze_date: today, category: "IT/테크",
+				keyword_a: "아이폰16 Pro", keyword_b: "갤럭시 S24 Ultra",
+				title: "세기의 대결! 아이폰16 vs 갤럭시S24, 당신의 선택은?",
+				controversy_score: 92, metric_a_value: 850000, metric_b_value: 790000
+			},
+			{
+				analyze_date: today, category: "스포츠",
+				keyword_a: "손흥민", keyword_b: "이강인",
+				title: "한국 축구의 에이스 논쟁, 손흥민 vs 이강인 기록 전격 비교!",
+				controversy_score: 75, metric_a_value: 125000, metric_b_value: 112000
+			}
+		];
 
-			console.log("Data analyzed. Saving to DB...");
-			
-			// DB (D1)에 PENDING 상태로 데이터 적재
-			const insertQuery = `
-				INSERT INTO hot_issues (analyze_date, category, keyword_a, keyword_b, title, controversy_score, status) 
-				VALUES (?, ?, ?, ?, ?, ?, 'PENDING')
-			`;
-			
-			await env.DB.prepare(insertQuery)
-				.bind(
-					dummyIssue.analyze_date, 
-					dummyIssue.category, 
-					dummyIssue.keyword_a, 
-					dummyIssue.keyword_b, 
-					dummyIssue.title, 
-					dummyIssue.controversy_score
-				)
-				.run();
-				
-			console.log("Successfully saved to DB with PENDING status.");
-		} catch (error) {
-			console.error("Failed to fetch and process daily issues:", error);
-		}
+		const insertQuery = `
+			INSERT INTO hot_issues (analyze_date, category, keyword_a, keyword_b, title, controversy_score, metric_a_value, metric_b_value, status) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
+		`;
+
+		const stmts = mockDataList.map(data => 
+			env.DB.prepare(insertQuery).bind(
+				data.analyze_date, data.category, data.keyword_a, data.keyword_b, 
+				data.title, data.controversy_score, data.metric_a_value, data.metric_b_value
+			)
+		);
+		
+		await env.DB.batch(stmts);
+		console.log("3 Mock issues generated successfully.");
 	},
 
-	// 진입점 B에서 호출하는 렌더링, 업로드 및 발행 로직
+	// 내부 메서드: 유튜브 발행 시뮬레이션
 	async processPublishing(issueId, env) {
 		try {
-			console.log(`Starting publishing process for issue ${issueId}...`);
+			// 1. 상태를 PROCESSING으로 변경
+			await env.DB.prepare("UPDATE hot_issues SET status = 'PROCESSING' WHERE id = ?").bind(issueId).run();
+			console.log(`[Issue ${issueId}] Status -> PROCESSING. Generating video...`);
 
-			// 1. DB에서 발행할 이슈 정보 가져오기
-			const issue = await env.DB.prepare("SELECT * FROM hot_issues WHERE id = ?")
-				.bind(issueId)
-				.first();
+			// 2. 비디오 인코딩 대기 (Shotstack API 모방, 4초 대기)
+			await new Promise(resolve => setTimeout(resolve, 4000));
+			const dummyVideoUrl = `https://vs-shorts-bucket.example.com/video_${issueId}.mp4`;
+			console.log(`[Issue ${issueId}] Video generated at ${dummyVideoUrl}`);
 
-			if (!issue) {
-				throw new Error(`Issue ${issueId} not found in DB.`);
-			}
+			// 3. 유튜브 API 업로드 모방 (2초 대기)
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			console.log(`[Issue ${issueId}] Uploaded to YouTube via API.`);
 
-			// 2. HTML 템플릿 기반 렌더링 (비디오 생성)
-			console.log("Rendering HTML template and generating video...");
-			// 실제 구현 시 외부 렌더링 서버(Puppeteer/Remotion) 또는 브라우저 렌더링 호출
-			await new Promise(resolve => setTimeout(resolve, 2000)); // 렌더링 딜레이 시뮬레이션
-			const dummyVideoContent = "binary_video_data_mock"; 
-			const fileName = `shorts_${issueId}_${Date.now()}.mp4`;
+			// 4. 상태를 COMPLETED로 변경
+			await env.DB.prepare("UPDATE hot_issues SET status = 'COMPLETED', updated_at = datetime('now', 'localtime') WHERE id = ?").bind(issueId).run();
+			console.log(`[Issue ${issueId}] Status -> COMPLETED. Process finished.`);
 
-			// 3. 완성된 영상을 R2 BUCKET에 업로드
-			console.log(`Uploading ${fileName} to R2 Bucket...`);
-			await env.BUCKET.put(fileName, dummyVideoContent, {
-				httpMetadata: { contentType: 'video/mp4' }
-			});
-
-			// 4. 유튜브 API로 발행 요청 전송
-			console.log("Sending publish request to YouTube API...");
-			// TODO: YouTube Data API 호출
-			// await fetch("https://www.googleapis.com/youtube/v3/videos?part=snippet,status", {
-			//     method: "POST",
-			//     headers: { Authorization: `Bearer ${YOUTUBE_TOKEN}`, ... },
-			//     body: ...
-			// });
-
-			// 5. 완료 후 DB 상태 업데이트 (PUBLISHED)
-			await env.DB.prepare("UPDATE hot_issues SET status = 'PUBLISHED', updated_at = CURRENT_TIMESTAMP WHERE id = ?")
-				.bind(issueId)
-				.run();
-
-			console.log(`Publishing process for issue ${issueId} completed successfully.`);
 		} catch (error) {
-			console.error(`Publishing process failed for issue ${issueId}:`, error);
-			
-			// 실패 시 DB 상태 업데이트 (FAILED)
-			try {
-				await env.DB.prepare("UPDATE hot_issues SET status = 'FAILED', updated_at = CURRENT_TIMESTAMP WHERE id = ?")
-					.bind(issueId)
-					.run();
-			} catch (dbError) {
-				console.error("Failed to update status to FAILED:", dbError);
-			}
+			console.error(`Error in processPublishing for issue ${issueId}:`, error);
+			await env.DB.prepare("UPDATE hot_issues SET status = 'FAILED', updated_at = datetime('now', 'localtime') WHERE id = ?").bind(issueId).run();
 		}
 	}
 };

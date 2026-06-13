@@ -1,4 +1,4 @@
--- D1 Database Schema for VS Shorts Automation
+-- D1 Database Schema for VS Shorts Automation V2
 
 DROP TABLE IF EXISTS hot_issues;
 
@@ -9,20 +9,20 @@ CREATE TABLE hot_issues (
     keyword_a TEXT NOT NULL,             -- VS 대상 A (예: 삼성전자)
     keyword_b TEXT NOT NULL,             -- VS 대상 B (예: SK하이닉스)
     title TEXT NOT NULL,                 -- 영상 타이틀 후킹 문구
-    controversy_score INTEGER DEFAULT 50,-- 논쟁 지수 (0 ~ 100)
-    status TEXT DEFAULT 'PENDING',       -- 상태 (PENDING, PROCESSING, COMPLETED, FAILED)
+    controversy_score INTEGER DEFAULT 50,-- 논쟁 지수 (0 ~ 100) (기존 데이터 호환성 위해 유지)
+    metric_a_value INTEGER DEFAULT 0,    -- A의 비교 수치 (예: 검색량, 지지율 등)
+    metric_b_value INTEGER DEFAULT 0,    -- B의 비교 수치
+    status TEXT DEFAULT 'PENDING',       -- 상태 (PENDING, COMPLETED, FAILED)
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
 
--- 상태 기반 조회를 최적화하기 위한 인덱스
 CREATE INDEX IF NOT EXISTS idx_hot_issues_status ON hot_issues(status);
 
--- 스케줄 등 앱 설정을 저장하는 테이블
+DROP TABLE IF EXISTS app_settings;
 CREATE TABLE IF NOT EXISTS app_settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL,
     updated_at DATETIME DEFAULT (datetime('now', 'localtime'))
 );
 
--- 초기 스케줄 값 세팅 (매일 아침 09:00)
 INSERT OR IGNORE INTO app_settings (key, value) VALUES ('schedule_time', '09:00');
