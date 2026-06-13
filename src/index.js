@@ -95,21 +95,31 @@ export default {
 			
 			// 테스트용 모의 데이터
 			const dummyIssue = {
-				title: "글로벌 AI 반도체 시장 최신 동향",
-				content: "빅테크 기업들의 AI 반도체 수요가 증가함에 따라 시장이 활기를 띠고 있습니다.",
-				source: "Mock Finance API"
+				analyze_date: new Date().toISOString().split('T')[0],
+				category: "IT/테크",
+				keyword_a: "삼성전자",
+				keyword_b: "SK하이닉스",
+				title: "[HBM 패권전쟁] 삼성전자 vs SK하이닉스, 과연 승자는?",
+				controversy_score: 85
 			};
 
 			console.log("Data analyzed. Saving to DB...");
 			
 			// DB (D1)에 PENDING 상태로 데이터 적재
 			const insertQuery = `
-				INSERT INTO hot_issues (title, content, source, status) 
-				VALUES (?, ?, ?, 'PENDING')
+				INSERT INTO hot_issues (analyze_date, category, keyword_a, keyword_b, title, controversy_score, status) 
+				VALUES (?, ?, ?, ?, ?, ?, 'PENDING')
 			`;
 			
 			await env.DB.prepare(insertQuery)
-				.bind(dummyIssue.title, dummyIssue.content, dummyIssue.source)
+				.bind(
+					dummyIssue.analyze_date, 
+					dummyIssue.category, 
+					dummyIssue.keyword_a, 
+					dummyIssue.keyword_b, 
+					dummyIssue.title, 
+					dummyIssue.controversy_score
+				)
 				.run();
 				
 			console.log("Successfully saved to DB with PENDING status.");

@@ -4,12 +4,14 @@ DROP TABLE IF EXISTS hot_issues;
 
 CREATE TABLE hot_issues (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    source TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, PUBLISHED, FAILED
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    analyze_date TEXT NOT NULL,          -- 분석 날짜 (YYYY-MM-DD)
+    category TEXT NOT NULL,              -- 구분 (주식, 스포츠, 로컬맛집 등)
+    keyword_a TEXT NOT NULL,             -- VS 대상 A (예: 삼성전자)
+    keyword_b TEXT NOT NULL,             -- VS 대상 B (예: SK하이닉스)
+    title TEXT NOT NULL,                 -- 영상 타이틀 후킹 문구
+    controversy_score INTEGER DEFAULT 50,-- 논쟁 지수 (0 ~ 100)
+    status TEXT DEFAULT 'PENDING',       -- 상태 (PENDING, PROCESSING, COMPLETED, FAILED)
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
 
 -- 상태 기반 조회를 최적화하기 위한 인덱스

@@ -6,24 +6,43 @@
 
 ---
 
-## 1. Cloudflare 관리자 웹 주소
-클라우드플레어 대시보드 주소는 아래와 같습니다. 브라우저에서 열어주세요.
-👉 **https://dash.cloudflare.com/**
+## 🛑 에러 원인 파악: GitHub에 레포지토리가 없습니다!
+터미널에서 발생한 `Repository not found` 에러는 **GitHub 사이트 쪽에 `vs_shorts-automation` 이라는 이름의 빈 저장소가 아직 안 만들어져 있어서** 발생하는 것입니다!
 
-## 2. Cloudflare Pages 배포 방법 (대시보드 화면)
-1. 위 주소로 로그인 후, 좌측 메뉴에서 **[Workers & Pages]** 클릭
-2. 파란색 **[Create application]** 버튼 클릭
-3. 상단 탭에서 **[Pages]** 선택
-4. **[Connect to Git]** 버튼을 누르고, 앞서 코드를 올려둔 `vs_shorts-automation` 레포지토리를 선택
-5. 배포 설정 창 하단의 **Build output directory** 칸에 `dashboard` 라고 입력 (다른 칸은 모두 비워둠)
-6. **Save and Deploy** 클릭
+제가 직접 사용자의 GitHub 계정으로 로그인해서 만들어드릴 권한이 없으므로, **아래 링크를 클릭해서 직접 레포지토리를 생성**해 주셔야 합니다.
 
-위 과정을 마치면 `https://vs-shorts-automation.pages.dev` 와 같은 본인만의 대시보드 웹 주소가 생깁니다!
+👉 **[여기를 클릭해서 GitHub 레포지토리 만들기](https://github.com/new?name=vs_shorts-automation)**
+
+위 링크를 누르시면 이름이 미리 입력된 레포지토리 생성 화면이 뜹니다. 화면 맨 아래의 초록색 **[Create repository]** 버튼만 누르시면 완성됩니다.
 
 ---
 
-## ❓ "싸이트에 연결할 수 없음" 오류가 뜰 경우
-`https://vs-shorts-automation.pages.dev/` 는 **예시 주소**입니다! 
+## 🚀 레포지토리를 만들었다면? 다시 푸시하기!
+GitHub 홈페이지에서 초록색 버튼을 눌러 레포지토리 생성을 무사히 마치셨다면, 다시 터미널로 돌아와서 아래 명령어를 쳐주세요.
 
-1. **아직 배포를 안 하셨다면:** Cloudflare 홈페이지(https://dash.cloudflare.com/)에 들어가서 **위 2번의 배포 과정**을 직접 완료해 주셔야 주소가 생성됩니다.
-2. **배포를 완료하셨다면:** Cloudflare에서 생성해 준 **진짜 주소**가 다를 수 있습니다. (예: `vs-shorts-automation-abc.pages.dev`) Cloudflare Pages 대시보드 완료 화면에 나오는 실제 파란색 링크 주소를 클릭해서 들어가셔야 합니다!
+```bash
+git push -u origin main
+```
+이제 정상적으로 코드가 업로드될 것입니다! 코드가 올라가면 아래의 Cloudflare 배포 단계를 진행해 주세요.
+
+---
+
+## ✅ 백엔드 배포 완료 및 "Not Found" 에러 설명
+축하합니다! `npx wrangler deploy` 명령어를 통해 **백엔드(Worker)가 성공적으로 배포**되었습니다.
+
+방금 브라우저로 들어가신 `https://vs-shorts-automation.khcho0421.workers.dev` 주소에서 **`{"error": "Not Found"}`가 뜨는 것은 완전히 정상**입니다! 
+
+- **이유:** 해당 주소는 눈에 보이는 '웹페이지(HTML)'가 아니라, 데이터를 주고받는 'API 서버(백엔드)'이기 때문입니다. 현재 서버는 `/api/issues` 와 `/api/publish` 주소만 알아듣게끔 설정되어 있어 기본 주소(`/`)로 접속하면 없다고 나오는 것입니다.
+
+---
+
+## 🚀 Cloudflare Pages 배포 (화면 만들기)
+1. **https://dash.cloudflare.com/** 에 접속 및 로그인
+2. 좌측 메뉴에서 **[Workers & Pages]** 클릭
+3. 파란색 **[Create application]** 버튼 클릭
+4. 상단 탭에서 **[Pages]** 선택
+5. **[Connect to Git]** 버튼을 누르고, 방금 푸시한 `vs_shorts-automation` 레포지토리를 연결
+6. 배포 설정 창 하단의 **Build output directory** 칸에 `dashboard` 라고 입력 (중요 ⭐️)
+7. **Save and Deploy** 클릭
+
+위 과정을 마치면 `https://vs-shorts-automation.pages.dev` (또는 비슷한 이름)의 **진짜 대시보드 웹 주소**가 생성됩니다! 그곳이 진짜 접속하셔야 할 곳입니다.

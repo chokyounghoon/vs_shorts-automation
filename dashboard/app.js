@@ -26,13 +26,21 @@ async function fetchIssues() {
 
         tableBody.innerHTML = issues.map(issue => `
             <tr>
-                <td>#${issue.id}</td>
-                <td><span class="status-badge status-${issue.status}">${issue.status}</span></td>
-                <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${issue.title}">
+                <td style="color: var(--text-secondary); font-size: 0.9em;">${issue.analyze_date}</td>
+                <td><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">${issue.category}</span></td>
+                <td><strong style="color: #60a5fa;">${issue.keyword_a}</strong> <span style="font-size: 0.8em; color: var(--text-secondary);">vs</span> <strong style="color: #f87171;">${issue.keyword_b}</strong></td>
+                <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;" title="${issue.title}">
                     ${issue.title}
                 </td>
-                <td>${issue.source}</td>
-                <td>${new Date(issue.created_at).toLocaleString()}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 50px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div style="width: ${issue.controversy_score}%; height: 100%; background: ${issue.controversy_score >= 80 ? 'var(--status-failed)' : 'var(--status-pending)'};"></div>
+                        </div>
+                        <span style="font-size: 0.85em;">${issue.controversy_score}</span>
+                    </div>
+                </td>
+                <td><span class="status-badge status-${issue.status}">${issue.status}</span></td>
                 <td>
                     <button 
                         class="btn-publish" 
