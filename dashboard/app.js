@@ -3,7 +3,75 @@ const API_BASE_URL = "https://vs-shorts-automation.khcho0421.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
+    fetchSettings();
 });
+
+async function fetchSettings() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/settings`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.schedule_time) {
+                document.getElementById("scheduleTime").value = data.schedule_time;
+            }
+        }
+    } catch (error) {
+        console.error("Failed to load settings:", error);
+    }
+}
+
+window.saveSchedule = async function() {
+    const timeValue = document.getElementById("scheduleTime").value;
+    const btn = document.getElementById("saveScheduleBtn");
+    
+    if (!timeValue) return alert("Please select a valid time.");
+    
+    btn.disabled = true;
+    btn.innerText = "Saving...";
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/settings`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ schedule_time: timeValue })
+        });
+
+        if (!response.ok) throw new Error("Failed to save schedule");
+        
+        btn.innerText = "Saved!";
+        setTimeout(() => { btn.innerText = "Save"; btn.disabled = false; }, 2000);
+    } catch (error) {
+        console.error(error);
+        alert("Failed to save schedule.");
+        btn.innerText = "Save";
+        btn.disabled = false;
+    }
+}
+
+window.triggerScraping = async function() {
+    const btn = document.getElementById("triggerScrapingBtn");
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerText = "Triggering...";
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/trigger`, { method: "POST" });
+        if (!response.ok) throw new Error("Failed to trigger scraping");
+        
+        alert("Scraping started! Check back in a few seconds.");
+        setTimeout(() => {
+            fetchIssues();
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 3000);
+    } catch (error) {
+        console.error(error);
+        alert("Failed to trigger scraping.");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
 
 async function fetchIssues() {
     const tableBody = document.getElementById("issuesBody");

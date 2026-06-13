@@ -1,9 +1,29 @@
 export default {
-	// 진입점 A (Cron Trigger): 매일 새벽 지정된 시간에 작동
+	// 진입점 A (Cron Trigger): 매분 작동하며 DB 설정 시간에 맞춰 실행
 	async scheduled(event, env, ctx) {
 		console.log(`[Cron Trigger] Scheduled event triggered at ${event.cron}`);
-		// 비동기 처리: 이벤트 수명 주기를 연장하여 작업이 완료될 때까지 기다림
-		ctx.waitUntil(this.fetchAndProcessDailyIssues(env));
+		
+		// DB에서 설정된 스케줄 시간 가져오기 (기본값 09:00)
+		const setting = await env.DB.prepare("SELECT value FROM app_settings WHERE key = 'schedule_time'").first();
+		const targetTime = setting ? setting.value : "09:00"; // "HH:MM" 형식
+
+		// 현재 시간을 한국 시간(KST) 기준으로 구하기
+		const now = new Date();
+		const kstOffset = 9 * 60 * 60 * 1000;
+		const kstDate = new Date(now.getTime() + kstOffset);
+		const currentHour = kstDate.getUTCHours().toString().padStart(2, '0');
+		const currentMinute = kstDate.getUTCMinutes().toString().padStart(2, '0');
+		const currentTime = `${currentHour}:${currentMinute}`;
+
+		console.log(`Current Time (KST): ${currentTime}, Target Time: ${targetTime}`);
+
+		// 현재 시간이 설정된 시간과 정확히 일치할 때만 실행
+		if (currentTime === targetTime) {
+			console.log("Time matched! Executing daily scraping...");
+			ctx.waitUntil(this.fetchAndProcessDailyIssues(env));
+		} else {
+			console.log("Time not matched. Skipping execution.");
+		}
 	},
 
 	// 진입점 B (HTTP POST API): 프론트엔드 대시보드의 '발행하기' 호출 처리
@@ -56,6 +76,70 @@ export default {
 						"Content-Type": "application/json",
 						"Access-Control-Allow-Origin": "*"
 					}
+				});
+			}
+		}
+
+		// /api/settings 엔드포인트: 스케줄 설정 조회
+		if (request.method === "GET" && url.pathname === "/api/settings") {
+			try {
+				const setting = await env.DB.prepare("SELECT value FROM app_settings WHERE key = 'schedule_time'").first();
+				return new Response(JSON.stringify({ schedule_time: setting ? setting.value : "09:00" }), {
+					status: 200,
+					headers: { 
+						"Content-Type": "application/json",
+						"Access-Control-Allow-Origin": "*"
+					}
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({ error: "Failed to fetch settings" }), {
+					status: 500,
+					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+				});
+			}
+		}
+
+		// /api/settings 엔드포인트: 스케줄 설정 저장
+		if (request.method === "POST" && url.pathname === "/api/settings") {
+			try {
+				const { schedule_time } = await request.json();
+				if (!schedule_time || !/^\d{2}:\d{2}$/.test(schedule_time)) {
+					return new Response(JSON.stringify({ error: "Invalid time format (HH:MM)" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+					});
+				}
+
+				await env.DB.prepare(`
+					INSERT INTO app_settings (key, value, updated_at) 
+					VALUES ('schedule_time', ?, datetime('now', 'localtime'))
+					ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+				`).bind(schedule_time).run();
+
+				return new Response(JSON.stringify({ success: true, schedule_time }), {
+					status: 200,
+					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({ error: "Failed to save settings" }), {
+					status: 500,
+					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+				});
+			}
+		}
+
+		// /api/trigger 엔드포인트: 스크래퍼 수동 즉시 실행
+		if (request.method === "POST" && url.pathname === "/api/trigger") {
+			try {
+				ctx.waitUntil(this.fetchAndProcessDailyIssues(env));
+				return new Response(JSON.stringify({ message: "Scraping triggered manually." }), {
+					status: 202,
+					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({ error: "Failed to trigger scraping" }), {
+					status: 500,
+					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
 				});
 			}
 		}

@@ -13,4 +13,4 @@ binding = "BUCKET"
 bucket_name = "vs-shorts-bucket"
 
 [triggers]
-crons = ["0 0 * * *"] # 매일 자정 작동 (Cron Trigger)
+crons = ["* * * * *"] # 매분 작동 (DB 설정 시간과 비교하여 실제 실행)

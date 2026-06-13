@@ -15,6 +15,25 @@
         </header>
         
         <main>
+            <div class="control-panel glass-panel" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div class="schedule-control" style="display: flex; align-items: center; gap: 1rem;">
+                    <div>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 0.2rem;">Daily Scraping Schedule (KST)</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="time" id="scheduleTime" style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; padding: 0.5rem; border-radius: 6px; font-family: 'Inter', sans-serif;">
+                            <button class="btn-publish" onclick="saveSchedule()" id="saveScheduleBtn" style="background: var(--status-published);">Save</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="manual-trigger">
+                    <button class="btn-publish" onclick="triggerScraping()" id="triggerScrapingBtn" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        Run Scraper Now
+                    </button>
+                </div>
+            </div>
+
             <div class="glass-panel">
                 <div class="table-container">
                     <table id="issuesTable">

@@ -15,4 +15,14 @@ CREATE TABLE hot_issues (
 );
 
 -- 상태 기반 조회를 최적화하기 위한 인덱스
-CREATE INDEX idx_hot_issues_status ON hot_issues(status);
+CREATE INDEX IF NOT EXISTS idx_hot_issues_status ON hot_issues(status);
+
+-- 스케줄 등 앱 설정을 저장하는 테이블
+CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at DATETIME DEFAULT (datetime('now', 'localtime'))
+);
+
+-- 초기 스케줄 값 세팅 (매일 아침 09:00)
+INSERT OR IGNORE INTO app_settings (key, value) VALUES ('schedule_time', '09:00');
