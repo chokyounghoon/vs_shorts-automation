@@ -8,7 +8,7 @@ const HTML_CONTENT = `
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2canvas 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Jua&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -25,22 +25,50 @@ const HTML_CONTENT = `
         .rec-indicator { animation: pulse-red 1.5s infinite; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col gap-6">
+<body class="min-h-screen bg-slate-900 text-slate-50 flex overflow-hidden">
 
-    <header class="glass rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4">
-        <div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">
-                VS Shorts Automation ⚡️
-            </h1>
-            <p class="text-slate-400 text-sm mt-1">Multi-method Video Pipeline</p>
+    <!-- Sidebar -->
+    <aside class="w-64 glass border-r border-slate-700/50 flex flex-col hidden md:flex shrink-0 z-50">
+        <div class="p-6 border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">Antigravity Studio</h2>
         </div>
-        <div>
-            <button onclick="window.location.href='/api/auth/google'" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
-                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                유튜브 계정 연동하기
+        <nav class="flex-1 p-4 flex flex-col gap-2">
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left transition-colors bg-white/10 text-indigo-400 font-semibold" data-target="page-shorts" onclick="switchTab('page-shorts', this)">
+                <span class="text-xl">🎬</span> Shorts Factory
             </button>
-        </div>
-    </header>
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-stock" onclick="switchTab('page-stock', this)">
+                <span class="text-xl">📈</span> 전일 주식 시황
+            </button>
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-llm" onclick="switchTab('page-llm', this)">
+                <span class="text-xl">🤖</span> AI 쇼츠 대장간
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col h-screen relative overflow-hidden">
+        
+        <!-- ==================== SHORTS FACTORY PAGE ==================== -->
+        <div id="page-shorts" class="page-section absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6">
+            <header class="glass rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4 shrink-0">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">
+                        VS Shorts Automation ⚡️
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">Multi-method Video Pipeline</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.location.href='https://vs-shorts-automation.khcho0421.workers.dev/api/auth/instagram'" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        인스타 연동
+                    </button>
+                    <!-- 워커(Worker) 백엔드로 로그인 요청 -->
+                    <button onclick="window.location.href='/api/auth/google'" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        유튜브 연동
+                    </button>
+                </div>
+            </header>
 
     <main class="flex flex-col xl:flex-row gap-6 h-full flex-1 min-h-[600px]">
         <!-- Left Column -->
@@ -92,31 +120,148 @@ const HTML_CONTENT = `
                     <p class="text-sm font-medium">리스트에서 항목을 선택하고<br><strong class="text-slate-300">결과물 보기</strong> 버튼을 누르세요.</p>
                 </div>
 
-                <div id="activePreview" class="absolute inset-0 flex flex-col hidden bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center">
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90"></div>
-                    <div class="relative z-10 pt-16 px-4 text-center">
-                        <h3 class="text-[2.5rem] font-black text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,0.6)] leading-tight tracking-tighter">
-                            기적을<br>만들어보자
-                        </h3>
+                <div id="vsPreview" class="absolute inset-0 flex flex-col hidden bg-[#f6f4ed] overflow-hidden font-['Jua']">
+                    <!-- 종이 질감을 위한 미세 노이즈 패턴 (CSS) -->
+                    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+                    
+                    <!-- 잎사귀/꽃 장식 -->
+                    <div class="absolute top-[-10px] left-[-10px] text-5xl opacity-80 rotate-45">🌿</div>
+                    <div class="absolute top-2 right-2 text-4xl opacity-80 -rotate-12">🌸</div>
+
+                    <!-- 상단 헤더 -->
+                    <div class="relative z-10 pt-12 px-4 text-center w-full">
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="text-[2.5rem] animate-bounce drop-shadow-md">⏰</span>
+                            <div class="relative inline-block">
+                                <h3 class="text-[1.8rem] text-green-800 tracking-tight leading-none z-10 relative">
+                                    <span id="previewDate" class="text-[2.2rem] text-green-700"></span> 전에는 <span class="text-green-700">꼭</span> 사라!!
+                                </h3>
+                                <!-- 빨간색 손그림 밑줄 -->
+                                <svg class="absolute -bottom-3 left-0 w-full h-4 z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
+                                    <path d="M0 5 Q 50 10 100 2" stroke="#dc2626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-sm mt-5 font-['Nanum_Pen_Script'] text-2xl tracking-widest text-slate-700">다시 말하지만, <strong class="text-red-600 font-bold">목숨 걸고</strong> 이야기합니다.</p>
+                        <!-- 별 그리기 -->
+                        <div class="absolute right-6 top-24 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
                     </div>
-                    <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 w-full mt-4">
-                        <p id="previewCategory" class="text-[0.65rem] font-black bg-white/10 border border-white/20 px-3 py-1.5 rounded-full mb-8 tracking-[0.2em] uppercase text-slate-300 backdrop-blur-md"></p>
-                        <div class="w-full flex justify-between items-center px-2 mb-10">
-                            <div class="w-[42%] text-center"><h4 id="previewA" class="text-xl md:text-2xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)] break-keep leading-tight"></h4></div>
-                            <div class="w-[16%] text-center"><span class="text-2xl font-black italic text-white opacity-90 drop-shadow-md">VS</span></div>
-                            <div class="w-[42%] text-center"><h4 id="previewB" class="text-xl md:text-2xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.5)] break-keep leading-tight"></h4></div>
-                        </div>
-                        <div class="w-full px-2 mb-4">
-                            <div class="flex justify-between text-sm font-black mb-3">
-                                <span id="valA" class="text-blue-400 text-lg">0</span><span id="valB" class="text-red-400 text-lg">0</span>
+
+                    <!-- 메인 아이템 -->
+                    <div class="relative z-10 flex-1 flex flex-col justify-center px-5 w-full mt-2 gap-4">
+                        
+                        <!-- 아이템 A -->
+                        <div class="w-full bg-white rounded-2xl p-4 shadow-[0_4px_10px_rgba(0,0,0,0.05)] border-2 border-slate-200 relative">
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center justify-center w-6 h-6 rounded-full text-blue-600 border-2 border-blue-600 text-sm font-bold bg-white">①</span>
+                                <h4 id="previewA" class="text-xl text-slate-800 tracking-tight leading-none pt-1"></h4>
                             </div>
-                            <div class="w-full h-5 bg-slate-900 rounded-full overflow-hidden flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] border border-white/10">
-                                <div id="barA" class="progress-bar h-full bg-gradient-to-r from-blue-700 to-blue-400" style="width: 0%"></div>
-                                <div id="barB" class="progress-bar h-full bg-gradient-to-l from-red-700 to-red-400" style="width: 0%"></div>
+                            <p class="text-slate-500 mt-2 pl-8 text-xs font-['Nanum_Pen_Script'] text-xl">가치 지표: <span id="valA" class="text-blue-500"></span></p>
+                            <!-- 장식 아이콘 -->
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[2.5rem] drop-shadow-md">🚀</div>
+                        </div>
+
+                        <!-- VS 뱃지 -->
+                        <div class="relative w-full flex justify-center -my-3 z-20">
+                            <div class="bg-red-500 text-white px-3 py-1 rounded-full text-lg border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.2)] rotate-[-8deg] font-black tracking-widest">VS</div>
+                        </div>
+
+                        <!-- 아이템 B -->
+                        <div class="w-full bg-white rounded-2xl p-4 shadow-[0_4px_10px_rgba(0,0,0,0.05)] border-2 border-slate-200 relative">
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center justify-center w-6 h-6 rounded-full text-red-600 border-2 border-red-600 text-sm font-bold bg-white">②</span>
+                                <h4 id="previewB" class="text-xl text-slate-800 tracking-tight leading-none pt-1"></h4>
+                            </div>
+                            <p class="text-slate-500 mt-2 pl-8 text-xs font-['Nanum_Pen_Script'] text-xl">가치 지표: <span id="valB" class="text-red-500"></span></p>
+                            <!-- 장식 아이콘 -->
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[2.5rem] drop-shadow-md">🏢</div>
+                        </div>
+
+                        <!-- 프로그레스 바 영역 -->
+                        <div class="w-full mt-4 px-1">
+                            <div class="flex justify-between font-['Nanum_Pen_Script'] text-xl mb-1 px-1">
+                                <span class="text-blue-600 font-bold" id="pctA">0%</span>
+                                <span class="text-red-600 font-bold" id="pctB">0%</span>
+                            </div>
+                            <div class="w-full h-4 bg-white rounded-full overflow-hidden flex border-2 border-slate-300 shadow-inner">
+                                <div id="barA" class="progress-bar h-full bg-blue-400" style="width: 0%"></div>
+                                <div id="barB" class="progress-bar h-full bg-red-400" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-3 text-slate-700 bg-white/60 p-2 rounded-xl border border-dashed border-slate-300 text-sm leading-tight" id="previewTitle"></div>
+                        </div>
+                    </div>
+
+                    <!-- 하단 CTA 박스 & 고양이 -->
+                    <div class="mt-auto relative w-full pt-4">
+                        <div class="mx-4 bg-white rounded-xl p-3 shadow-md border-2 border-slate-300 flex items-center justify-between mb-[4.5rem] relative z-10">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow-sm">💬</span>
+                                <div class="text-[0.7rem] leading-snug font-['Nanum_Pen_Script'] text-lg">
+                                    댓글에 <strong class="text-red-600 text-xl font-bold bg-slate-100 px-1 rounded border border-slate-200">888</strong> 남기면<br>무료로 전체 리스트 발송!
+                                </div>
+                            </div>
+                            <div class="text-3xl animate-pulse drop-shadow-md mr-1">🎁</div>
+                        </div>
+                        
+                        <!-- 고양이 하단 -->
+                        <div class="absolute bottom-0 left-0 w-full h-[4.5rem] bg-[#3d2c23] flex items-end justify-center gap-3 text-[3rem] pb-2 overflow-hidden border-t-4 border-[#2a1d17]">
+                            <span class="translate-y-2 hover:-translate-y-1 transition-transform">🐱</span>
+                            <span class="translate-y-3 hover:-translate-y-1 transition-transform">😸</span>
+                            <span class="translate-y-1 hover:-translate-y-1 transition-transform">😻</span>
+                            <span class="translate-y-4 hover:-translate-y-1 transition-transform">😼</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIST Layout Preview Card -->
+                <div id="listPreview" class="absolute inset-0 flex flex-col hidden bg-[#f6f4ed] overflow-hidden font-['Jua']">
+                    <!-- 미세 노이즈 패턴 (CSS) -->
+                    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+                    
+                    <!-- 잎사귀/꽃 장식 -->
+                    <div class="absolute top-[-10px] left-[-10px] text-5xl opacity-80 rotate-45">🌿</div>
+                    <div class="absolute top-2 right-2 text-4xl opacity-80 -rotate-12">🌸</div>
+
+                    <!-- 상단 헤더 -->
+                    <div class="relative z-10 pt-10 px-4 text-center w-full">
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="text-[2.2rem] animate-bounce drop-shadow-md">⏰</span>
+                            <div class="relative inline-block">
+                                <h3 id="listTitle" class="text-[1.8rem] text-green-800 tracking-tight leading-none z-10 relative"></h3>
+                                <!-- 빨간색 손그림 밑줄 -->
+                                <svg class="absolute -bottom-2 left-0 w-full h-3 z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
+                                    <path d="M0 5 Q 50 10 100 2" stroke="#dc2626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                </svg>
                             </div>
                         </div>
-                        <div class="mt-auto pb-10 w-full px-4">
-                            <p id="previewTitle" class="text-center text-sm text-slate-200 font-medium leading-relaxed bg-black/50 p-3 rounded-xl border border-white/10 backdrop-blur-md"></p>
+                        <p id="listSubtitle" class="text-sm mt-3 font-['Nanum_Pen_Script'] text-2xl tracking-widest text-slate-700">다시 말하지만, <strong class="text-red-600 font-bold">목숨 걸고</strong> 이야기합니다.</p>
+                        <!-- 별 그리기 -->
+                        <div class="absolute right-4 top-20 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
+                    </div>
+
+                    <!-- 메인 아이템 리스트 (동적 렌더링) -->
+                    <div class="relative z-10 flex-1 flex flex-col justify-start px-3 w-full mt-2 gap-2 overflow-y-auto" id="listItemsContainer">
+                        <!-- Items will be injected here via app.js -->
+                    </div>
+
+                    <!-- 하단 CTA 박스 & 고양이 -->
+                    <div class="mt-auto relative w-full pt-2">
+                        <div class="mx-4 bg-white/90 rounded-xl p-2 shadow-md border-2 border-slate-300 flex items-center justify-between mb-[4.5rem] relative z-10">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow-sm">💬</span>
+                                <div class="text-[0.65rem] leading-snug font-['Nanum_Pen_Script'] text-base">
+                                    댓글에 <strong class="text-red-600 text-lg font-bold bg-slate-100 px-1 rounded border border-slate-200">888</strong> 남기면<br>무료로 전체 리스트 발송!
+                                </div>
+                            </div>
+                            <div class="text-2xl animate-pulse drop-shadow-md mr-1">🎁</div>
+                        </div>
+                        
+                        <!-- 고양이 하단 -->
+                        <div class="absolute bottom-0 left-0 w-full h-[4.5rem] bg-[#3d2c23] flex items-end justify-center gap-3 text-[3rem] pb-2 overflow-hidden border-t-4 border-[#2a1d17]">
+                            <span class="translate-y-2 hover:-translate-y-1 transition-transform">🐱</span>
+                            <span class="translate-y-3 hover:-translate-y-1 transition-transform">😸</span>
+                            <span class="translate-y-1 hover:-translate-y-1 transition-transform">😻</span>
+                            <span class="translate-y-4 hover:-translate-y-1 transition-transform">😼</span>
                         </div>
                     </div>
                 </div>
@@ -126,18 +271,116 @@ const HTML_CONTENT = `
                 <button id="btnPreview" onclick="renderPreview()" disabled class="bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg">
                     선택한 주제 VS 결과물 보기
                 </button>
-                <div class="flex gap-2 w-full">
-                    <button id="btnPublishMock" onclick="publishYoutubeMock()" disabled class="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg text-[13px]">
+                <div class="flex flex-col gap-2 md:flex-row w-full mt-2">
+                    <button id="btnPublishMock" onclick="publishYoutubeMock()" disabled class="flex-1 bg-slate-600 hover:bg-slate-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-semibold transition-all shadow-lg text-[13px]">
                         서버 가상 모사
                     </button>
-                    <button id="btnPublishBrowser" onclick="publishYoutubeBrowser()" disabled class="flex-[1.5] bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(220,38,38,0.3)] flex items-center justify-center gap-1.5 text-[13px]">
+                    <button id="btnPublishBrowser" onclick="publishYoutubeBrowser('private')" disabled class="flex-[1.5] bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(220,38,38,0.3)] flex items-center justify-center gap-1.5 text-[13px]">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                        브라우저 녹화 (방법 A)
+                        🔒 유튜브 단독 발행 (비공개)
                     </button>
                 </div>
+                <button id="btnPublishAll" onclick="publishAll()" disabled class="w-full bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(236,72,153,0.4)] flex items-center justify-center gap-1.5 text-[14px]">
+                    <span class="text-xl">🚀</span> 동시 발행 (YouTube + Instagram 릴스)
+                </button>
             </div>
         </div>
-    </main>
+        </main>
+        </div> <!-- End of Shorts Factory Page -->
+
+        <!-- ==================== STOCK MARKET PAGE ==================== -->
+        <div id="page-stock" class="page-section absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 hidden">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 tracking-tight">
+                        전일 주식 시황 요약 📈
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">AI-powered Global & Local Market Summary</p>
+                </div>
+                <div>
+                    <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2">
+                        최신 시황 불러오기
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 glass rounded-2xl p-6 flex flex-col items-center justify-center border border-dashed border-slate-600/50">
+                <div class="text-6xl mb-4 animate-bounce">🚧</div>
+                <h3 class="text-2xl text-slate-200 font-bold tracking-tight">데이터 연동 및 UI 개발 중입니다</h3>
+                <p class="text-slate-500 mt-3 text-center max-w-md leading-relaxed">
+                    이곳에서 전일 주식 시장의 주요 이슈와 상승/하락 테마를 요약하여 보여줄 예정입니다. <br>
+                    추후 이 화면도 쇼츠 대본 템플릿과 결합될 수 있습니다.
+                </p>
+            </main>
+        </div> <!-- End of Stock Market Page -->
+
+        <!-- ==================== LLM STUDIO PAGE ==================== -->
+        <div id="page-llm" class="page-section hidden absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 bg-slate-900">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-400 tracking-tight">
+                        AI 쇼츠 대장간 🤖
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">LLM Powered Content Generation Studio</p>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col xl:flex-row gap-6 min-h-[600px] overflow-hidden">
+                <!-- 1. Data Input (좌측) -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-slate-700/50 relative">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        <span class="bg-slate-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
+                        원본 데이터 입력
+                    </h2>
+                    <textarea id="llmRawData" class="flex-1 bg-slate-800/80 border border-slate-600 rounded-xl p-4 text-slate-200 text-sm focus:outline-none focus:border-pink-500 resize-none transition-colors" placeholder="여기에 뉴스 기사, 리포트 등 원본 텍스트를 붙여넣으세요..."></textarea>
+                    <button onclick="document.getElementById('llmRawData').value = Array.from(document.querySelectorAll('#stockListUS li span:last-child, #stockListKR li span:last-child')).map(el => el.innerText).join('\\n');" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all">
+                        오늘의 증시 뉴스 불러오기
+                    </button>
+                </div>
+
+                <!-- 2. System Prompt (중앙) -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-pink-500/30 relative">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        <span class="bg-pink-500 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> 
+                        시스템 프롬프트 (LLM 지시)
+                    </h2>
+                    <textarea id="llmPrompt" class="flex-1 bg-slate-800/80 border border-pink-500/50 rounded-xl p-4 text-slate-200 text-sm focus:outline-none focus:border-pink-500 resize-none transition-colors" placeholder="예: 주어진 텍스트에서 가장 자극적인 헤드라인 5개를 뽑고 JSON 형식으로 반환해줘.">주어진 뉴스 데이터에서 가장 사람들의 이목을 끌 수 있는 자극적인 주식 이슈 2가지를 뽑아줘. 반드시 아래 JSON 형식으로만 답변해.
+[
+  {
+    "title": "주제 메인 타이틀 (예: 삼성전자 부활?)",
+    "keyword_a": "키워드A",
+    "keyword_b": "키워드B",
+    "metric_a_value": 85000,
+    "metric_b_value": 78000
+  }
+]</textarea>
+                    <button id="btnGenerateContent" onclick="generateLLMContent()" class="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 text-white px-4 py-3.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(244,63,94,0.4)] flex items-center justify-center gap-2">
+                        <span class="text-lg">✨</span> LLM 생성하기
+                    </button>
+                </div>
+
+                <!-- 3. Output & Render (우측) -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        <span class="bg-indigo-500 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> 
+                        JSON 결과 및 적용
+                    </h2>
+                    <div id="llmOutputWrapper" class="flex-1 relative bg-slate-900/80 rounded-xl border border-slate-600 overflow-hidden">
+                        <textarea id="llmOutputJSON" class="absolute inset-0 w-full h-full bg-transparent p-4 text-emerald-400 font-mono text-xs focus:outline-none resize-none" placeholder="LLM 결과물이 여기에 표시됩니다..." readonly></textarea>
+                        
+                        <div id="llmLoading" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                            <div class="animate-spin rounded-full h-10 w-10 border-4 border-pink-500 border-t-transparent mb-3"></div>
+                            <p class="text-pink-400 text-sm font-bold animate-pulse">마법을 부리는 중...</p>
+                        </div>
+                    </div>
+                    <button id="btnApplyLLM" onclick="applyLLMToTemplate()" disabled class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+                        템플릿에 데이터 덮어쓰기
+                    </button>
+                </div>
+            </main>
+        </div> <!-- End of LLM Studio Page -->
+
+    </div> <!-- End of Main Content Area -->
 
     <script>
         let issuesData = [];
@@ -174,10 +417,18 @@ const HTML_CONTENT = `
             tbody.innerHTML = issuesData.map(function(item) {
                 const isSelected = selectedIssue?.id === item.id ? 'row-selected' : '';
                 const statusClass = item.status === 'COMPLETED' ? 'text-green-500 bg-green-500/10' : (item.status === 'FAILED' ? 'text-red-500 bg-red-500/10' : 'text-yellow-500 bg-yellow-500/10');
+                
+                let matchUpText = '';
+                if (item.layout_type === 'LIST') {
+                    matchUpText = '<span class="text-indigo-400 font-bold">[리스트]</span> <span class="text-xs text-slate-300 ml-1">' + item.title + '</span>';
+                } else {
+                    matchUpText = '<span class="text-blue-400">' + (item.keyword_a || '') + '</span><span class="mx-1 text-xs">vs</span><span class="text-red-400">' + (item.keyword_b || '') + '</span>';
+                }
+
                 return '<tr class="cursor-pointer hover:bg-slate-800/80 transition-colors ' + isSelected + '" onclick="selectRow(' + item.id + ')">' +
                     '<td class="p-4 text-slate-400">' + item.analyze_date + '</td>' +
                     '<td class="p-4"><span class="bg-white/10 px-2.5 py-1 rounded-md text-xs border border-white/5">' + item.category + '</span></td>' +
-                    '<td class="p-4 font-medium"><span class="text-blue-400">' + item.keyword_a + '</span><span class="mx-1 text-xs">vs</span><span class="text-red-400">' + item.keyword_b + '</span></td>' +
+                    '<td class="p-4 font-medium max-w-[200px] truncate" title="'+item.title+'">' + matchUpText + '</td>' +
                     '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ' + statusClass + '">' + item.status + '</span></td>' +
                 '</tr>';
             }).join('');
@@ -195,25 +446,84 @@ const HTML_CONTENT = `
         window.renderPreview = function() {
             if (!selectedIssue) return;
             document.getElementById('emptyPreview').classList.add('hidden');
-            document.getElementById('activePreview').classList.remove('hidden');
             
-            _injectPreviewData();
-            _triggerAnimation();
+            if (selectedIssue.layout_type === 'LIST') {
+                document.getElementById('vsPreview').classList.add('hidden');
+                document.getElementById('listPreview').classList.remove('hidden');
+                _injectListData();
+            } else {
+                document.getElementById('listPreview').classList.add('hidden');
+                document.getElementById('vsPreview').classList.remove('hidden');
+                _injectPreviewData();
+                _triggerAnimation();
+            }
+        }
+
+        function _formatDate(dateStr) {
+            if (!dateStr) return "오늘";
+            const parts = dateStr.split('-');
+            if (parts.length >= 3) {
+                return parseInt(parts[1]) + '월 ' + parseInt(parts[2]) + '일';
+            }
+            return dateStr;
         }
 
         function _injectPreviewData() {
-            document.getElementById('previewCategory').innerText = selectedIssue.category;
-            document.getElementById('previewA').innerText = selectedIssue.keyword_a;
-            document.getElementById('previewB').innerText = selectedIssue.keyword_b;
+            document.getElementById('previewDate').innerText = _formatDate(selectedIssue.analyze_date);
+            document.getElementById('previewA').innerText = selectedIssue.keyword_a || '';
+            document.getElementById('previewB').innerText = selectedIssue.keyword_b || '';
             document.getElementById('previewTitle').innerText = selectedIssue.title;
             document.getElementById('barA').style.width = '0%';
             document.getElementById('barB').style.width = '0%';
             document.getElementById('valA').innerText = '0';
             document.getElementById('valB').innerText = '0';
+            document.getElementById('pctA').innerText = '0%';
+            document.getElementById('pctB').innerText = '0%';
+        }
+
+        function _injectListData() {
+            document.getElementById('listTitle').innerText = selectedIssue.title;
+            const container = document.getElementById('listItemsContainer');
+            container.innerHTML = '';
+
+            let items = [];
+            try {
+                if (selectedIssue.items_json) {
+                    items = JSON.parse(selectedIssue.items_json);
+                }
+            } catch(e) { console.error(e); }
+
+            const colors = ['text-blue-600', 'text-green-600', 'text-yellow-600', 'text-purple-600', 'text-red-600', 'text-orange-600', 'text-teal-600', 'text-pink-600'];
+
+            let html = '';
+            items.forEach((item, idx) => {
+                const color = colors[idx % colors.length];
+                const rank = item.rank || (idx + 1);
+                const subDetailHTML = item.subDetail ? '<p class="text-[0.65rem] text-slate-500 font-[\\'Nanum_Pen_Script\\'] text-sm tracking-wide mt-0.5">• ' + item.subDetail + '</p>' : '';
+                const icon = item.icon || '✨';
+                
+                html += '<div class="w-full bg-white/90 rounded-xl p-2 shadow-[0_2px_5px_rgba(0,0,0,0.05)] border border-slate-200 flex items-center relative gap-2 shrink-0">' +
+                    '<span class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-slate-800 text-sm font-bold shrink-0 ' + color + '">' +
+                        rank +
+                    '</span>' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-baseline gap-1">' +
+                            '<h4 class="text-base text-slate-800 tracking-tight leading-tight truncate">' + item.title + '</h4>' +
+                            '<span class="text-xs text-slate-500 font-[\\'Nanum_Pen_Script\\'] text-base ml-1">→</span>' +
+                            '<span class="text-xs text-slate-700 truncate">' + item.detail + '</span>' +
+                        '</div>' +
+                        subDetailHTML +
+                    '</div>' +
+                    '<div class="text-2xl drop-shadow-sm ml-1 shrink-0">' + icon + '</div>' +
+                '</div>';
+            });
+            container.innerHTML = html;
         }
 
         function _triggerAnimation() {
-            const tA = selectedIssue.metric_a_value, tB = selectedIssue.metric_b_value;
+            if (selectedIssue.layout_type === 'LIST') return; // 리스트는 별도 애니메이션 없음
+
+            const tA = selectedIssue.metric_a_value || 0, tB = selectedIssue.metric_b_value || 0;
             const pctA = (tA + tB === 0) ? 50 : Math.round((tA / (tA+tB)) * 100);
             
             setTimeout(() => {
@@ -221,6 +531,8 @@ const HTML_CONTENT = `
                 document.getElementById('barB').style.width = (100 - pctA) + '%';
                 document.getElementById('valA').innerText = new Intl.NumberFormat().format(tA);
                 document.getElementById('valB').innerText = new Intl.NumberFormat().format(tB);
+                document.getElementById('pctA').innerText = pctA + '%';
+                document.getElementById('pctB').innerText = (100 - pctA) + '%';
             }, 100);
         }
 
@@ -288,31 +600,43 @@ const HTML_CONTENT = `
             });
         }
 
-        window.publishYoutubeBrowser = async function() {
+        window.publishYoutubeBrowser = async function(privacyStatus = 'private') {
             if (!selectedIssue) return;
-            const btn = document.getElementById('btnPublishBrowser');
-            btn.disabled = true; 
-            btn.innerHTML = '브라우저 렌더링 중... (창 유지)';
+            const btn = document.getElementById(privacyStatus === 'public' ? 'btnPublishPublic' : 'btnPublishBrowser');
+            // 만약 src/index.js (HTML_CONTENT) 에는 btnPublishPublic 버튼이 없다면 btnPublishBrowser 사용 (방어코드)
+            const targetBtn = btn || document.getElementById('btnPublishBrowser');
+            if (!targetBtn) return;
+            const originalText = targetBtn.innerHTML;
+            targetBtn.disabled = true; 
+            targetBtn.innerHTML = '브라우저 렌더링 중... (창 유지)';
 
             try {
                 // 1. 렌더링 셋업 및 REC 온
                 document.getElementById('emptyPreview').classList.add('hidden');
-                document.getElementById('activePreview').classList.remove('hidden');
-                _injectPreviewData();
+                if (selectedIssue.layout_type === 'LIST') {
+                    document.getElementById('vsPreview').classList.add('hidden');
+                    document.getElementById('listPreview').classList.remove('hidden');
+                    _injectListData();
+                } else {
+                    document.getElementById('listPreview').classList.add('hidden');
+                    document.getElementById('vsPreview').classList.remove('hidden');
+                    _injectPreviewData();
+                    _triggerAnimation();
+                }
                 document.getElementById('recIndicator').classList.remove('hidden');
 
                 // 2. 애니메이션 시작과 동시에 녹화 시작
-                _triggerAnimation();
                 const videoBlob = await recordCanvas();
                 
                 document.getElementById('recIndicator').classList.add('hidden');
-                btn.innerHTML = '실제 업로드 중...';
+                targetBtn.innerHTML = '실제 업로드 중...';
 
                 // 3. FormData 구성 (Blob 전송)
                 const formData = new FormData();
                 formData.append('issueId', selectedIssue.id);
                 formData.append('title', selectedIssue.title);
                 formData.append('videoFile', videoBlob, 'shorts.webm');
+                formData.append('privacyStatus', privacyStatus);
 
                 // 4. API 쏘기
                 const res = await fetch('/api/publish-youtube', {
@@ -327,15 +651,176 @@ const HTML_CONTENT = `
                     renderTable();
                 } else {
                     alert("업로드 오류: " + (data.error || "알 수 없는 오류"));
-                    btn.disabled = false; btn.innerHTML = '브라우저 녹화 (방법 A)';
+                    targetBtn.disabled = false; targetBtn.innerHTML = originalText;
                 }
             } catch(e) { 
                 alert("요청 실패: " + e.message); 
-                btn.disabled = false; btn.innerHTML = '브라우저 녹화 (방법 A)'; 
+                targetBtn.disabled = false; targetBtn.innerHTML = originalText; 
                 document.getElementById('recIndicator').classList.add('hidden');
             }
         }
+
+        window.publishAll = async function() {
+            const targetBtn = document.getElementById('btnPublishAll');
+            const originalText = targetBtn.innerHTML;
+            targetBtn.disabled = true;
+            targetBtn.innerHTML = '<span class="animate-pulse">녹화 & 전송 중...</span>';
+            
+            try {
+                if(!selectedIssue) throw new Error("주제를 선택해주세요.");
+                
+                document.getElementById('recIndicator').classList.remove('hidden');
+                const videoBlob = await recordCanvas();
+                document.getElementById('recIndicator').classList.add('hidden');
+                
+                targetBtn.innerHTML = '<span class="animate-pulse">멀티 채널 업로드 중...</span>';
+
+                const formData = new FormData();
+                formData.append('issueId', selectedIssue.id);
+                formData.append('title', selectedIssue.title);
+                formData.append('videoFile', videoBlob, 'shorts.mp4'); 
+                formData.append('privacyStatus', 'public');
+
+                const res = await fetch('/api/publish-all', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if(res.ok) {
+                    alert("동시 발행 성공!\\n유튜브 ID: " + (data.youtubeId || '성공') + "\\n인스타 ID: " + (data.instagramId || '성공'));
+                    selectedIssue.status = 'COMPLETED'; 
+                    renderTable();
+                } else {
+                    alert("업로드 오류: " + (data.error || JSON.stringify(data)));
+                }
+            } catch(e) {
+                alert("요청 실패: " + e.message); 
+                document.getElementById('recIndicator').classList.add('hidden');
+            } finally {
+                targetBtn.disabled = false;
+                targetBtn.innerHTML = originalText;
+            }
+        }
+
+        // --- LLM Studio API 연동 ---
+        window.generateLLMContent = async function() {
+            const rawData = document.getElementById('llmRawData').value;
+            const prompt = document.getElementById('llmPrompt').value;
+            const loading = document.getElementById('llmLoading');
+            const outputJSON = document.getElementById('llmOutputJSON');
+            const btnApply = document.getElementById('btnApplyLLM');
+
+            if (!rawData || !prompt) {
+                alert("원본 데이터와 시스템 프롬프트를 모두 입력해주세요.");
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            outputJSON.value = "";
+            btnApply.disabled = true;
+
+            try {
+                const res = await fetch('/api/generate-content', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rawData, prompt })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    let cleanStr = typeof data.result === 'string' ? data.result : JSON.stringify(data.result, null, 2);
+                    cleanStr = cleanStr.replace(/\\x60\\x60\\x60json/g, '').replace(/\\x60\\x60\\x60/g, '').trim();
+                    outputJSON.value = cleanStr;
+                    btnApply.disabled = false;
+                } else {
+                    alert("LLM 생성 오류: " + (data.error || "알 수 없는 오류"));
+                }
+            } catch(e) {
+                alert("요청 실패: " + e.message);
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        window.applyLLMToTemplate = async function() {
+            try {
+                const jsonStr = document.getElementById('llmOutputJSON').value;
+                const parsedData = JSON.parse(jsonStr);
+                const items = Array.isArray(parsedData) ? parsedData : [parsedData];
+                
+                const res = await fetch('/api/fetch-issues', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ generatedItems: items })
+                });
+
+                if (res.ok) {
+                    alert("데이터가 이슈 팩토리에 성공적으로 등록되었습니다!");
+                    switchTab('page-shorts', document.querySelector('.nav-btn[data-target="page-shorts"]'));
+                    loadIssues();
+                } else {
+                    const err = await res.json();
+                    alert("적용 실패: " + err.error);
+                }
+            } catch(e) {
+                alert("JSON 형식이 올바르지 않습니다: " + e.message);
+            }
+        }
+
+        // --- 네비게이션 탭 전환 로직 ---
+        window.switchTab = function(targetId, btnElement) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+            
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) targetEl.classList.remove('hidden');
+
+            if (btnElement) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('bg-white/10', 'text-indigo-400');
+                    btn.classList.add('text-slate-400');
+                });
+                btnElement.classList.add('bg-white/10', 'text-indigo-400');
+                btnElement.classList.remove('text-slate-400');
+            }
+        }
+
+        // --- 주식 시황 API 호출 ---
+        window.fetchStockNews = async function() {
+            const btn = document.getElementById('btnFetchStock');
+            btn.disabled = true;
+            document.getElementById('stockEmpty').classList.add('hidden');
+            document.getElementById('stockContent').classList.remove('hidden');
+            document.getElementById('stockLoading').classList.remove('hidden');
+            
+            try {
+                // HTML_CONTENT 내에서는 상대경로 사용 가능 (동일 Origin)
+                const res = await fetch('/api/stock-news');
+                const data = await res.json();
+                
+                const listEl = document.getElementById('stockList');
+                listEl.innerHTML = '';
+                
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach((item, idx) => {
+                        const li = document.createElement('li');
+                        li.className = "bg-white/10 p-4 rounded-xl border border-slate-600/50 hover:bg-white/20 transition-colors flex items-center gap-3";
+                        li.innerHTML = '<span class="text-emerald-400 font-bold w-6 h-6 flex items-center justify-center bg-emerald-400/20 rounded-full shrink-0">' + (idx+1) + '</span>' +
+                                       '<span class="text-slate-200 text-sm md:text-base">' + item + '</span>';
+                        listEl.appendChild(li);
+                    });
+                } else {
+                    listEl.innerHTML = '<li class="text-slate-400 text-center py-8">뉴스를 불러올 수 없습니다.</li>';
+                }
+            } catch(e) {
+                alert("시황 불러오기 실패: " + e.message);
+            } finally {
+                btn.disabled = false;
+                document.getElementById('stockLoading').classList.add('hidden');
+            }
+        }
     </script>
+    <script src="/app.js"></script>
 </body>
 </html>
 `;
@@ -368,6 +853,87 @@ export default {
 			return Response.redirect(authUrl, 302);
 		}
 
+		const IG_REDIRECT_URI = url.origin + '/api/auth/instagram/callback';
+
+		if (request.method === "GET" && url.pathname === "/api/auth/instagram") {
+			const clientId = env.IG_CLIENT_ID;
+			if(!clientId) return new Response("IG_CLIENT_ID not set in environment variables. Please configure Meta App ID.", { status: 500 });
+			
+			const scope = encodeURIComponent("instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement,business_management");
+			const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(IG_REDIRECT_URI)}&scope=${scope}&response_type=code`;
+			return Response.redirect(authUrl, 302);
+		}
+
+		if (request.method === "GET" && url.pathname === "/api/auth/instagram/callback") {
+			const code = url.searchParams.get('code');
+			if (!code) return new Response("Code not found", { status: 400 });
+
+			try {
+				// 1. 단기 토큰 발급
+				const tokenResponse = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${env.IG_CLIENT_ID}&redirect_uri=${encodeURIComponent(IG_REDIRECT_URI)}&client_secret=${env.IG_CLIENT_SECRET}&code=${code}`);
+				const tokenData = await tokenResponse.json();
+				if (!tokenData.access_token) throw new Error("단기 토큰 발급 실패: " + JSON.stringify(tokenData));
+
+				// 2. 장기 토큰 교환
+				const longLivedRes = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${env.IG_CLIENT_ID}&client_secret=${env.IG_CLIENT_SECRET}&fb_exchange_token=${tokenData.access_token}`);
+				const longLivedData = await longLivedRes.json();
+				const accessToken = longLivedData.access_token || tokenData.access_token;
+
+				// 3. 페이지 목록 및 연결된 인스타그램 계정 조회
+				const accountsRes = await fetch(`https://graph.facebook.com/v18.0/me/accounts?access_token=${accessToken}`);
+				const accountsData = await accountsRes.json();
+				
+				let igUserId = null;
+				let debugInfo = [];
+				if (accountsData.data && accountsData.data.length > 0) {
+					for (const page of accountsData.data) {
+						const pageInfoRes = await fetch(`https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account,name&access_token=${accessToken}`);
+						const pageInfo = await pageInfoRes.json();
+						debugInfo.push({ pageName: pageInfo.name, pageId: page.id, hasIgAccount: !!pageInfo.instagram_business_account });
+						if (pageInfo.instagram_business_account) {
+							igUserId = pageInfo.instagram_business_account.id;
+							break;
+						}
+					}
+				}
+
+				if (!igUserId) {
+					const errorMsg = `
+						<div style="font-family: sans-serif; padding: 20px;">
+							<h2 style="color: red;">연결된 인스타그램 비즈니스/크리에이터 계정을 찾을 수 없습니다.</h2>
+							<p>페이스북 페이지와 인스타그램이 정상적으로 연결되어 있는지 확인해 주세요.</p>
+							<hr>
+							<h3>디버깅 정보</h3>
+							<pre style="background: #eee; padding: 10px; border-radius: 5px;">
+페이스북에서 불러온 페이지 개수: ${accountsData.data ? accountsData.data.length : 0}
+페이지 상세 정보:
+${JSON.stringify(debugInfo, null, 2)}
+전체 응답:
+${JSON.stringify(accountsData, null, 2)}
+							</pre>
+							<p><b>해결 방법:</b></p>
+							<ol>
+								<li>앱 권한 부여 화면에서 <b>모든 페이지</b>를 선택했는지 확인하세요.</li>
+								<li>인스타그램 앱에서 '설정 > 계정 센터'에 페이스북 페이지가 연결되어 있는지 확인하세요.</li>
+								<li>인스타그램 계정이 <b>비즈니스</b> 또는 <b>크리에이터</b> 계정인지 다시 한번 확인하세요.</li>
+							</ol>
+						</div>
+					`;
+					return new Response(errorMsg, { status: 400, headers: { "Content-Type": "text/html;charset=UTF-8" } });
+				}
+
+				// 4. DB 저장
+				await env.DB.prepare(`
+					INSERT INTO instagram_tokens (id, access_token, ig_user_id, updated_at) VALUES (1, ?, ?, datetime('now', 'localtime'))
+					ON CONFLICT(id) DO UPDATE SET access_token = excluded.access_token, ig_user_id = excluded.ig_user_id, updated_at = excluded.updated_at
+				`).bind(accessToken, igUserId).run();
+
+				return Response.redirect('https://vs-shorts-automation.pages.dev/?auth=success_ig', 302);
+			} catch (e) {
+				return new Response("인스타그램 연동 에러: " + e.message, { status: 500, headers: { "Content-Type": "text/html;charset=UTF-8" } });
+			}
+		}
+
 		if (request.method === "GET" && url.pathname === "/api/auth/callback") {
 			const code = url.searchParams.get('code');
 			if (!code) return new Response("Code not found", { status: 400 });
@@ -397,35 +963,240 @@ export default {
 		}
 
 		// 3. 비즈니스 로직 API
-		
-		if (request.method === "POST" && url.pathname === "/api/fetch-issues") {
-			const today = new Date().toISOString().split('T')[0];
-			const mockDataList = [
-				{
-					analyze_date: today, category: "미국주식",
-					keyword_a: "NVIDIA", keyword_b: "AMD",
-					title: "끝나지 않은 AI 반도체 전쟁! 엔비디아 vs AMD 승자는?",
-					controversy_score: 88, metric_a_value: 3450000, metric_b_value: 1250000
-				},
-				{
-					analyze_date: today, category: "소비재",
-					keyword_a: "코카콜라", keyword_b: "펩시",
-					title: "세기의 라이벌, 코카콜라 vs 펩시 블라인드 테스트 진실은?",
-					controversy_score: 95, metric_a_value: 65000, metric_b_value: 62000
-				},
-				{
-					analyze_date: today, category: "글로벌 IT",
-					keyword_a: "ChatGPT", keyword_b: "Gemini",
-					title: "인공지능 왕좌의 게임! 챗GPT vs 제미나이 압도적 차이",
-					controversy_score: 80, metric_a_value: 1050000, metric_b_value: 890000
-				}
-			];
 
-			const insertQuery = `INSERT INTO hot_issues (analyze_date, category, keyword_a, keyword_b, title, controversy_score, metric_a_value, metric_b_value, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')`;
-			const stmts = mockDataList.map(d => env.DB.prepare(insertQuery).bind(d.analyze_date, d.category, d.keyword_a, d.keyword_b, d.title, d.controversy_score, d.metric_a_value, d.metric_b_value));
-			
-			await env.DB.batch(stmts);
-			return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } });
+		if (request.method === "GET" && url.pathname === "/api/system-prompts") {
+			try {
+				const { results } = await env.DB.prepare("SELECT * FROM system_prompts ORDER BY id ASC").all();
+				return new Response(JSON.stringify({ success: true, prompts: results }), {
+					status: 200, headers: { "Content-Type": "application/json", ...corsHeaders }
+				});
+			} catch (e) {
+				return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
+		}
+		
+		if (request.method === "GET" && url.pathname === "/api/stock-news") {
+			try {
+				const targetDateStr = url.searchParams.get('date');
+				let searchQ_US = "미국 증시";
+				let searchQ_KR = "국내 증시";
+				if (targetDateStr) {
+					const targetDate = new Date(targetDateStr);
+					const nextDate = new Date(targetDate);
+					nextDate.setDate(targetDate.getDate() + 1);
+					const dateFilter = ` after:${targetDate.toISOString().split('T')[0]} before:${nextDate.toISOString().split('T')[0]}`;
+					searchQ_US += dateFilter;
+					searchQ_KR += dateFilter;
+				}
+
+				const fetchRSS = async (query) => {
+					const rssRes = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`, {
+						headers: {
+							"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+							"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+						}
+					});
+					const xmlText = await rssRes.text();
+					const items = [];
+					const itemRegex = /<item>[\s\S]*?<title>(.*?)<\/title>[\s\S]*?<\/item>/gi;
+					let match;
+					while ((match = itemRegex.exec(xmlText)) !== null) {
+						let title = match[1].replace(/<!\[CDATA\[(.*?)\]\]>/, '$1')
+											.replace(/&apos;/g, "'")
+											.replace(/&quot;/g, '"')
+											.replace(/&amp;/g, '&')
+											.replace(/&lt;/g, '<')
+											.replace(/&gt;/g, '>');
+						items.push(title);
+					}
+					return items;
+				};
+
+				const [itemsUS, itemsKR] = await Promise.all([fetchRSS(searchQ_US), fetchRSS(searchQ_KR)]);
+
+				return new Response(JSON.stringify({ 
+					success: true, 
+					us: itemsUS,
+					kr: itemsKR
+				}), {
+					status: 200, headers: { "Content-Type": "application/json", ...corsHeaders }
+				});
+			} catch (e) {
+				return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
+		}
+
+		if (request.method === "GET" && url.pathname === "/api/list-models") {
+			try {
+				const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${env.GEMINI_API_KEY}`);
+				const data = await res.json();
+				return new Response(JSON.stringify(data), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			} catch (e) {
+				return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
+		}
+
+		// API: 구글 Gemini 기반 콘텐츠 생성
+		if (request.method === "POST" && url.pathname === "/api/generate-content") {
+			try {
+				const reqData = await request.json();
+				const { rawData, prompt } = reqData;
+				if (!rawData || !prompt) return new Response(JSON.stringify({ error: "rawData and prompt are required" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+				if (!env.GEMINI_API_KEY) return new Response(JSON.stringify({ error: "GEMINI_API_KEY is not configured" }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+
+				const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						contents: [{
+							parts: [
+								{ text: prompt },
+								{ text: "=== Data ===" },
+								{ text: rawData }
+							]
+						}]
+					})
+				});
+
+				const geminiData = await geminiRes.json();
+				if (!geminiRes.ok) throw new Error(geminiData.error?.message || "Gemini API Error");
+
+				const textOutput = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "결과를 생성하지 못했습니다.";
+
+				return new Response(JSON.stringify({ success: true, result: textOutput }), {
+					status: 200, headers: { "Content-Type": "application/json", ...corsHeaders }
+				});
+			} catch (e) {
+				return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
+		}
+
+		
+		// API: OpenAI DALL-E 3 이미지 생성
+		if (request.method === "POST" && url.pathname === "/api/generate-image") {
+			try {
+				const reqData = await request.json();
+				const { title, items_json, systemPrompt } = reqData;
+				
+				if (!systemPrompt) return new Response(JSON.stringify({ error: "systemPrompt is required" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+				if (!env.OPENAI_API_KEY) return new Response(JSON.stringify({ error: "OPENAI_API_KEY is not configured" }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+				if (!env.GEMINI_API_KEY) return new Response(JSON.stringify({ error: "GEMINI_API_KEY is not configured" }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+
+				// 1. Gemini를 사용하여 영문 프롬프트로 고도화/번역
+				const geminiInput = `Translate and enhance the following context and style guidelines into a highly detailed, descriptive English prompt for AI image generation. DO NOT include any conversational text, ONLY return the final English prompt string.
+				
+				[Context]
+				Title: ${title}
+				Data: ${items_json}
+				
+				[Style Guideline (System Prompt)]
+				${systemPrompt}`;
+
+				const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						contents: [{ parts: [{ text: geminiInput }] }]
+					})
+				});
+
+				const geminiData = await geminiRes.json();
+				if (!geminiRes.ok) throw new Error(geminiData.error?.message || "Gemini Prompt Translation Error");
+				const finalPrompt = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || systemPrompt;
+
+				// 2. Gemini 3.1 Flash Image API 호출
+				const imageRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${env.GEMINI_API_KEY}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						contents: [{ parts: [{ text: finalPrompt }] }],
+						generationConfig: { responseModalities: ["IMAGE"] }
+					})
+				});
+
+				const imageData = await imageRes.json();
+				if (!imageRes.ok) throw new Error(imageData.error?.message || "Gemini Image Generation Error");
+
+				const base64Str = imageData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+				if (!base64Str) throw new Error("No image data returned from Gemini");
+
+				const imageUrl = "data:image/jpeg;base64," + base64Str;
+
+				return new Response(JSON.stringify({ success: true, imageUrl, promptUsed: finalPrompt }), {
+					status: 200, headers: { "Content-Type": "application/json", ...corsHeaders }
+				});
+			} catch (e) {
+				return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
+		}
+
+		if (request.method === "POST" && url.pathname === "/api/fetch-issues") {
+			try {
+				const reqData = await request.json().catch(() => ({}));
+				const today = new Date().toISOString().split('T')[0];
+				
+				let dataToInsert = [];
+
+				if (reqData.generatedItems && Array.isArray(reqData.generatedItems)) {
+					// LLM에서 생성된 데이터 주입
+					dataToInsert = reqData.generatedItems.map(item => ({
+						analyze_date: today,
+						category: item.category || "AI 생성 템플릿",
+						layout_type: item.layout_type || (item.items_json ? "LIST" : "VS"),
+						keyword_a: item.keyword_a || null,
+						keyword_b: item.keyword_b || null,
+						items_json: typeof item.items_json === 'object' ? JSON.stringify(item.items_json) : (item.items_json || null),
+						title: item.title || "제목 없음",
+						controversy_score: item.controversy_score || 90,
+						metric_a_value: item.metric_a_value || 0,
+						metric_b_value: item.metric_b_value || 0
+					}));
+				} else {
+					// 기본 데이터 주입 (LLM 미사용시)
+					const listItems = [
+						{ rank: 1, title: "대우건설", detail: "이미 시기가 지났습니다", subDetail: "현재 주가 : 2,731원", icon: "🚗" },
+						{ rank: 2, title: "엔비디아", detail: "계속 보유하시면 됩니다", subDetail: "예상 최고가 : 364,920원 (+13,261%)", icon: "🚙" },
+						{ rank: 3, title: "네이버", detail: "248,500 → 1,026,800", subDetail: "올해 가장 대박이 될 주식입니다", icon: "⏰" },
+						{ rank: 4, title: "한화오션", detail: "158,300 → 812,400", subDetail: "지금 매수 → 5개월 내", icon: "🚀" },
+						{ rank: 5, title: "삼성전자", detail: "214,700 → 739,500", subDetail: "부모님 연금 + 자녀 교육 자금 해결!", icon: "☕" },
+						{ rank: 6, title: "현대자동차", detail: "603,500 → 1,008,700", subDetail: "준비 자금 : 80만원 → 예상 1억원", icon: "🏢" },
+						{ rank: 7, title: "SK하이닉스", detail: "2,243,000 → 3,186,500", subDetail: "인수합병 소식이 터질 예정입니다", icon: "👍" },
+						{ rank: 8, title: "+17,986% 상승 가능 종목이 나왔습니다!", detail: "LG에너지솔루션 + 삼성SDI", subDetail: "", icon: "🔥" }
+					];
+
+					dataToInsert = [
+						{
+							analyze_date: today, category: "미국주식", layout_type: "VS",
+							keyword_a: "NVIDIA", keyword_b: "AMD", items_json: null,
+							title: "끝나지 않은 AI 반도체 전쟁! 엔비디아 vs AMD 승자는?",
+							controversy_score: 88, metric_a_value: 3450000, metric_b_value: 1250000
+						},
+						{
+							analyze_date: today, category: "국내주식 추천", layout_type: "LIST",
+							keyword_a: null, keyword_b: null, items_json: JSON.stringify(listItems),
+							title: "6월 13일 전에는 꼭 사라!!",
+							controversy_score: 95, metric_a_value: 0, metric_b_value: 0
+						},
+						{
+							analyze_date: today, category: "글로벌 IT", layout_type: "VS",
+							keyword_a: "ChatGPT", keyword_b: "Gemini", items_json: null,
+							title: "인공지능 왕좌의 게임! 챗GPT vs 제미나이 압도적 차이",
+							controversy_score: 80, metric_a_value: 1050000, metric_b_value: 890000
+						}
+					];
+				}
+
+				const insertQuery = `INSERT INTO hot_issues (analyze_date, category, layout_type, keyword_a, keyword_b, items_json, title, controversy_score, metric_a_value, metric_b_value, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')`;
+				
+				await env.DB.prepare("DELETE FROM hot_issues WHERE analyze_date = ?").bind(today).run();
+
+				const stmts = dataToInsert.map(d => env.DB.prepare(insertQuery).bind(d.analyze_date, d.category, d.layout_type, d.keyword_a, d.keyword_b, d.items_json, d.title, d.controversy_score, d.metric_a_value, d.metric_b_value));
+				await env.DB.batch(stmts);
+
+				return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			} catch (e) {
+				return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
 		}
 
 		if (request.method === "GET" && url.pathname === "/api/issues") {
@@ -451,6 +1222,7 @@ export default {
 				const issueId = formData.get('issueId');
 				const title = formData.get('title');
 				const videoFile = formData.get('videoFile'); // Blob (WebM)
+				const privacyStatus = formData.get('privacyStatus') || 'private';
 
 				if (!videoFile) {
 					return new Response(JSON.stringify({ error: "No video file received" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
@@ -463,18 +1235,37 @@ export default {
 
 				const accessToken = await this.getFreshAccessToken(tokenRecord.refresh_token, env);
 
-				const ytFormData = new FormData();
 				const metadata = {
 					snippet: { title: title + " #shorts #vs", description: "Auto-generated Shorts by Browser Recording", categoryId: "24", tags: ["shorts", "vs"] },
-					status: { privacyStatus: "private" }
+					status: { privacyStatus: privacyStatus }
 				};
-				ytFormData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-				ytFormData.append('file', videoFile, 'shorts.webm');
+
+				const boundary = '-------314159265358979323846';
+				const delimiter = "\r\n--" + boundary + "\r\n";
+				const closeDelimiter = "\r\n--" + boundary + "--";
+
+				const metadataPart = "Content-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify(metadata);
+				const mediaPart = "Content-Type: video/webm\r\n\r\n";
+
+				const videoArrayBuffer = await videoFile.arrayBuffer();
+				const encoder = new TextEncoder();
+				const part1 = encoder.encode(delimiter + metadataPart + delimiter + mediaPart);
+				const part2 = new Uint8Array(videoArrayBuffer);
+				const part3 = encoder.encode(closeDelimiter);
+
+				const body = new Uint8Array(part1.length + part2.length + part3.length);
+				body.set(part1, 0);
+				body.set(part2, part1.length);
+				body.set(part3, part1.length + part2.length);
 
 				const ytRes = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=multipart&part=snippet,status", {
 					method: "POST",
-					headers: { "Authorization": `Bearer ${accessToken}` },
-					body: ytFormData
+					headers: { 
+						"Authorization": `Bearer ${accessToken}`,
+						"Content-Type": `multipart/related; boundary=${boundary}`,
+						"Content-Length": body.length.toString()
+					},
+					body: body
 				});
 
 				const ytData = await ytRes.json();
@@ -484,12 +1275,129 @@ export default {
 					return new Response(JSON.stringify({ error: ytData.error?.message || "YouTube API Error" }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
 				}
 
-				await env.DB.prepare("UPDATE hot_issues SET status = 'COMPLETED', updated_at = datetime('now', 'localtime') WHERE id = ?").bind(issueId).run();
+				await env.DB.prepare("UPDATE hot_issues SET status = 'COMPLETED' WHERE id = ?").bind(issueId).run();
 				
 				return new Response(JSON.stringify({ message: "Successfully uploaded", videoId: ytData.id }), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } });
 			} catch (error) {
 				return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
 			}
+		}
+
+		// API 3C: 멀티 채널 동시 발행 (YouTube + Instagram)
+		if (request.method === "POST" && url.pathname === "/api/publish-all") {
+			try {
+				const formData = await request.formData();
+				const issueId = formData.get('issueId');
+				const title = formData.get('title');
+				const videoFile = formData.get('videoFile');
+				const privacyStatus = formData.get('privacyStatus') || 'public';
+
+				if (!videoFile) return new Response(JSON.stringify({ error: "No video file received" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+
+				const ytToken = await env.DB.prepare("SELECT refresh_token FROM youtube_tokens WHERE id = 1").first();
+				const igToken = await env.DB.prepare("SELECT access_token, ig_user_id FROM instagram_tokens WHERE id = 1").first();
+				
+				if (!ytToken || !igToken) {
+					return new Response(JSON.stringify({ error: "유튜브와 인스타그램 계정 모두 연동되어 있어야 합니다." }), { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } });
+				}
+
+				const videoArrayBuffer = await videoFile.arrayBuffer();
+				const fileName = `video_${Date.now()}.mp4`; 
+				
+				// R2 스토리지 업로드 (Instagram에서 접근 가능하도록)
+				await env.BUCKET.put(fileName, videoArrayBuffer, { httpMetadata: { contentType: videoFile.type } });
+				const videoUrl = `${url.origin}/public/${fileName}`; 
+
+				// --- 유튜브 발행 Promise ---
+				const ytPromise = (async () => {
+					const ytAccessToken = await this.getFreshAccessToken(ytToken.refresh_token, env);
+					const boundary = '-------314159265358979323846';
+					const delimiter = "\r\n--" + boundary + "\r\n";
+					const closeDelimiter = "\r\n--" + boundary + "--";
+
+					const metadata = { snippet: { title: title + " #shorts", description: "Auto-generated Shorts", categoryId: "24", tags: ["shorts"] }, status: { privacyStatus } };
+					const metadataPart = "Content-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify(metadata);
+					const mediaPart = `Content-Type: ${videoFile.type}\r\n\r\n`;
+
+					const encoder = new TextEncoder();
+					const part1 = encoder.encode(delimiter + metadataPart + delimiter + mediaPart);
+					const part2 = new Uint8Array(videoArrayBuffer);
+					const part3 = encoder.encode(closeDelimiter);
+					const body = new Uint8Array(part1.length + part2.length + part3.length);
+					body.set(part1, 0); body.set(part2, part1.length); body.set(part3, part1.length + part2.length);
+
+					const ytRes = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=multipart&part=snippet,status", {
+						method: "POST",
+						headers: { "Authorization": `Bearer ${ytAccessToken}`, "Content-Type": `multipart/related; boundary=${boundary}`, "Content-Length": body.length.toString() },
+						body: body
+					});
+					const ytData = await ytRes.json();
+					if (!ytRes.ok) throw new Error(ytData.error?.message || "YouTube Upload Failed");
+					return ytData.id;
+				})();
+
+				// --- 인스타그램 릴스 발행 Promise ---
+				const igPromise = (async () => {
+					const { access_token, ig_user_id } = igToken;
+					
+					// a. 컨테이너 생성
+					const createRes = await fetch(`https://graph.facebook.com/v18.0/${ig_user_id}/media`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							media_type: "REELS",
+							video_url: videoUrl,
+							caption: title + " #쇼츠 #자동화",
+							access_token: access_token
+						})
+					});
+					const createData = await createRes.json();
+					if (createData.error) throw new Error("IG Container Error: " + createData.error.message);
+					const containerId = createData.id;
+
+					// b. 폴링 (상태 체크)
+					let status = "IN_PROGRESS";
+					for (let i = 0; i < 15; i++) {
+						await new Promise(r => setTimeout(r, 4000)); 
+						const statusRes = await fetch(`https://graph.facebook.com/v18.0/${containerId}?fields=status_code&access_token=${access_token}`);
+						const statusData = await statusRes.json();
+						status = statusData.status_code;
+						if (status === "FINISHED") break;
+						if (status === "ERROR") throw new Error("IG Video Processing Error");
+					}
+					if (status !== "FINISHED") throw new Error("IG Processing Timeout");
+
+					// c. Publish
+					const publishRes = await fetch(`https://graph.facebook.com/v18.0/${ig_user_id}/media_publish`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ creation_id: containerId, access_token: access_token })
+					});
+					const publishData = await publishRes.json();
+					if (publishData.error) throw new Error("IG Publish Error: " + publishData.error.message);
+					return publishData.id;
+				})();
+
+				const [youtubeId, instagramId] = await Promise.all([ytPromise, igPromise]);
+				await env.DB.prepare("UPDATE hot_issues SET status = 'COMPLETED' WHERE id = ?").bind(issueId).run();
+				
+				return new Response(JSON.stringify({ success: true, youtubeId, instagramId }), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			} catch (error) {
+				return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } });
+			}
+		}
+
+		// R2 스토리지 퍼블릭 서빙 (Instagram 다운로드용)
+		if (request.method === "GET" && url.pathname.startsWith("/public/")) {
+			const fileName = url.pathname.replace("/public/", "");
+			const object = await env.BUCKET.get(fileName);
+			if (!object) return new Response("Not Found", { status: 404, headers: corsHeaders });
+			
+			const headers = new Headers();
+			object.writeHttpMetadata(headers);
+			headers.set('etag', object.httpEtag);
+			headers.set('Access-Control-Allow-Origin', '*');
+			return new Response(object.body, { headers });
 		}
 
 		return new Response(JSON.stringify({ error: "Not Found" }), { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } });
@@ -523,9 +1431,9 @@ export default {
 			// 가상의 유튜브 REST API 전송 대기
 			await new Promise(r => setTimeout(r, 2000));
 			
-			await env.DB.prepare("UPDATE hot_issues SET status = 'COMPLETED', updated_at = datetime('now', 'localtime') WHERE id = ?").bind(issueId).run();
+			await env.DB.prepare("UPDATE hot_issues SET status = 'COMPLETED' WHERE id = ?").bind(issueId).run();
 		} catch (error) {
-			await env.DB.prepare("UPDATE hot_issues SET status = 'FAILED', updated_at = datetime('now', 'localtime') WHERE id = ?").bind(issueId).run();
+			await env.DB.prepare("UPDATE hot_issues SET status = 'FAILED' WHERE id = ?").bind(issueId).run();
 		}
 	}
 };

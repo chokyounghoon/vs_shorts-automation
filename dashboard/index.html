@@ -6,7 +6,7 @@
     <title>VS Shorts Automation V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Jua&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -23,23 +23,78 @@
         .rec-indicator { animation: pulse-red 1.5s infinite; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col gap-6">
+<body class="min-h-screen bg-slate-900 text-slate-50 flex overflow-hidden">
 
-    <header class="glass rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4">
-        <div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">
-                VS Shorts Automation ⚡️
-            </h1>
-            <p class="text-slate-400 text-sm mt-1">Multi-method Video Pipeline</p>
+    <!-- Sidebar -->
+    <aside class="w-64 glass border-r border-slate-700/50 flex flex-col hidden md:flex shrink-0 z-50">
+        <div class="p-6 border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">Antigravity Studio</h2>
         </div>
-        <div>
-            <!-- 워커(Worker) 백엔드로 로그인 요청 -->
-            <button onclick="window.location.href='https://vs-shorts-automation.khcho0421.workers.dev/api/auth/google'" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
-                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                유튜브 계정 연동하기
+        <nav class="flex-1 p-4 flex flex-col gap-2">
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left transition-colors bg-white/10 text-indigo-400 font-semibold" data-target="page-shorts" onclick="switchTab('page-shorts', this)">
+                <span class="text-xl">🎬</span> Shorts Factory
             </button>
-        </div>
-    </header>
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-stock" onclick="switchTab('page-stock', this)">
+                <span class="text-xl">📈</span> 전일 주식 시황
+            </button>
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-llm" onclick="switchTab('page-llm', this)">
+                <span class="text-xl">🤖</span> AI 쇼츠 대장간
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col h-screen relative overflow-hidden">
+        
+        <!-- Global Top Actions -->
+        <header class="glass flex justify-between items-center px-6 py-3 border-b border-slate-700/50 shrink-0 z-50 bg-slate-900/80 backdrop-blur-md sticky top-0">
+            <!-- Publish Actions -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
+                <button id="btnPublishMock" onclick="publishYoutubeMock()" disabled class="shrink-0 bg-slate-600 hover:bg-slate-500 disabled:opacity-40 text-white px-3 py-2 rounded-lg font-semibold transition-all shadow-sm text-xs">
+                    서버 가상 모사
+                </button>
+                <button id="btnPublishBrowser" onclick="publishYoutubeBrowser('private')" disabled class="shrink-0 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white px-3 py-2 rounded-lg font-semibold transition-all shadow-sm text-xs flex items-center gap-1">
+                    🔒 유튜브 (비공개)
+                </button>
+                <button id="btnPublishPublic" onclick="publishYoutubeBrowser('public')" disabled class="shrink-0 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 disabled:opacity-40 text-white px-3 py-2 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1 text-xs">
+                    유튜브 (공개)
+                </button>
+                <button id="btnPublishInstagram" onclick="publishInstagramBrowser()" disabled class="shrink-0 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 disabled:opacity-40 text-white px-3 py-2 rounded-lg font-bold transition-all shadow-sm text-xs">
+                    인스타 릴스 (단독)
+                </button>
+                <button id="btnPublishAll" onclick="publishAll()" disabled class="shrink-0 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 disabled:opacity-40 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1 text-xs">
+                    🚀 동시 발행
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                    <button onclick="window.location.href='https://vs-shorts-automation.khcho0421.workers.dev/api/auth/instagram'" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        인스타 연동
+                    </button>
+                    <!-- 워커(Worker) 백엔드로 로그인 요청 -->
+                    <button onclick="window.location.href='https://vs-shorts-automation.khcho0421.workers.dev/api/auth/google'" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        유튜브 연동
+                    </button>
+                </div>
+        </header>
+
+        <!-- Workspace Split -->
+        <div class="flex-1 flex flex-col xl:flex-row relative overflow-y-auto xl:overflow-hidden">
+        <!-- Dynamic Tabs Area -->
+        <div class="flex-none min-h-[800px] xl:min-h-0 xl:flex-1 relative overflow-hidden flex flex-col">
+        <!-- ==================== SHORTS FACTORY PAGE ==================== -->
+        <div id="page-shorts" class="page-section absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6">
+            <header class="glass rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4 shrink-0">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">
+                        VS Shorts Automation ⚡️
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">Multi-method Video Pipeline</p>
+                </div>
+
+            </header>
 
     <main class="flex flex-col xl:flex-row gap-6 h-full flex-1 min-h-[600px]">
         <!-- Left Column -->
@@ -72,71 +127,361 @@
             </div>
         </div>
 
+        </main>
+        </div> <!-- End of Shorts Factory Page -->
+
+        <!-- ==================== STOCK MARKET PAGE ==================== -->
+        <div id="page-stock" class="page-section absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 hidden">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 tracking-tight">
+                        전일 주식 시황 요약 📈
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">AI-powered Global & Local Market Summary</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="date" id="stockDate" class="bg-slate-800/80 border border-slate-600 text-white px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500" />
+                    <button id="btnFetchStock" onclick="fetchStockNews()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2 shrink-0">
+                        시황 조회하기
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 glass rounded-2xl p-6 flex flex-col items-center justify-center border border-dashed border-slate-600/50 relative overflow-hidden">
+                <div id="stockLoading" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+                </div>
+                
+                <div id="stockEmpty" class="flex flex-col items-center justify-center text-center">
+                    <div class="text-6xl mb-4 animate-bounce">🚧</div>
+                    <h3 class="text-2xl text-slate-200 font-bold tracking-tight">데이터 연동 및 UI 개발 중입니다</h3>
+                    <p class="text-slate-500 mt-3 text-center max-w-md leading-relaxed">
+                        우측 상단의 날짜를 선택하고 <strong>시황 조회하기</strong> 버튼을 눌러 뉴스 목록을 확인해보세요.
+                    </p>
+                </div>
+
+                <div id="stockContent" class="w-full h-full hidden grid grid-cols-1 xl:grid-cols-2 gap-6 overflow-hidden">
+                    <!-- US Stock News -->
+                    <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                        <h3 class="text-xl font-bold text-slate-200 mb-0 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 flex items-center gap-2 border-b border-slate-700/50 rounded-t-2xl"><span class="text-2xl">🇺🇸</span> 미국 증시 뉴스</h3>
+                        <div class="overflow-y-auto flex-1 p-4">
+                            <ul id="stockListUS" class="flex flex-col gap-3"></ul>
+                        </div>
+                    </div>
+                    
+                    <!-- KR Stock News -->
+                    <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                        <h3 class="text-xl font-bold text-slate-200 mb-0 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 flex items-center gap-2 border-b border-slate-700/50 rounded-t-2xl"><span class="text-2xl">🇰🇷</span> 한국 증시 뉴스</h3>
+                        <div class="overflow-y-auto flex-1 p-4">
+                            <ul id="stockListKR" class="flex flex-col gap-3"></ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div> <!-- End of Stock Market Page -->
+
+        <!-- ==================== LLM STUDIO PAGE ==================== -->
+        <div id="page-llm" class="page-section hidden absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 bg-slate-900">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-400 tracking-tight">
+                        AI 쇼츠 대장간 🤖
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">LLM Powered Content Generation Studio</p>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col xl:flex-row gap-6 min-h-[600px] overflow-hidden">
+                <!-- 1. Data Input (좌측) -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-slate-700/50 relative">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        <span class="bg-slate-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
+                        원본 데이터 입력
+                    </h2>
+                    <textarea id="llmRawData" class="flex-1 bg-slate-800/80 border border-slate-600 rounded-xl p-4 text-slate-200 text-sm focus:outline-none focus:border-pink-500 resize-none transition-colors" placeholder="여기에 뉴스 기사, 리포트 등 원본 텍스트를 붙여넣으세요..."></textarea>
+                    <button onclick="document.getElementById('llmRawData').value = Array.from(document.querySelectorAll('#stockListUS li span:last-child, #stockListKR li span:last-child')).map(el => el.innerText).join('\\n');" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all">
+                        오늘의 증시 뉴스 불러오기
+                    </button>
+                </div>
+
+                <!-- 2. System Prompt (중앙) -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-pink-500/30 relative">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        <span class="bg-pink-500 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> 
+                        시스템 프롬프트 (LLM 지시)
+                    </h2>
+                    <textarea id="llmPrompt" class="flex-1 bg-slate-800/80 border border-pink-500/50 rounded-xl p-4 text-slate-200 text-sm focus:outline-none focus:border-pink-500 resize-none transition-colors" placeholder="예: 주어진 텍스트에서 가장 자극적인 헤드라인 5개를 뽑고 JSON 형식으로 반환해줘.">주어진 뉴스 데이터에서 가장 사람들의 이목을 끌 수 있는 자극적인 주식 이슈 2가지를 뽑아줘. 반드시 아래 JSON 형식으로만 답변해.
+[
+  {
+    "title": "주제 메인 타이틀 (예: 삼성전자 부활?)",
+    "keyword_a": "키워드A",
+    "keyword_b": "키워드B",
+    "metric_a_value": 85000,
+    "metric_b_value": 78000
+  }
+]</textarea>
+                    <button id="btnGenerateContent" onclick="generateLLMContent()" class="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 text-white px-4 py-3.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(244,63,94,0.4)] flex items-center justify-center gap-2">
+                        <span class="text-lg">✨</span> LLM 생성하기
+                    </button>
+                </div>
+
+                <!-- 3. Output & Render (우측) -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        <span class="bg-indigo-500 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> 
+                        JSON 결과 및 적용
+                    </h2>
+                    <div id="llmOutputWrapper" class="flex-1 relative bg-slate-900/80 rounded-xl border border-slate-600 overflow-hidden">
+                        <textarea id="llmOutputJSON" class="absolute inset-0 w-full h-full bg-transparent p-4 text-emerald-400 font-mono text-xs focus:outline-none resize-none" placeholder="LLM 결과물이 여기에 표시됩니다..." readonly></textarea>
+                        
+                        <div id="llmLoading" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                            <div class="animate-spin rounded-full h-10 w-10 border-4 border-pink-500 border-t-transparent mb-3"></div>
+                            <p class="text-pink-400 text-sm font-bold animate-pulse">마법을 부리는 중...</p>
+                        </div>
+                    </div>
+                    <button id="btnApplyLLM" onclick="applyLLMToTemplate()" disabled class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+                        템플릿에 데이터 덮어쓰기
+                    </button>
+                </div>
+            </main>
+        </div> <!-- End of LLM Studio Page -->
+        </div> <!-- End of Dynamic Tabs Area -->
+
         <!-- Right Column -->
-        <div class="w-full xl:w-[420px] glass rounded-2xl p-6 flex flex-col gap-5 flex-shrink-0 shadow-2xl">
+        <div class="w-full xl:w-[420px] glass p-6 flex flex-col gap-5 flex-shrink-0 shadow-2xl border-l border-slate-700/50 overflow-y-auto z-40 bg-slate-900/90 xl:bg-transparent" id="persistentPreviewPanel">
             <h2 class="text-xl font-semibold flex items-center gap-2 border-b border-slate-700/80 pb-3">
                 <span class="w-2 h-6 bg-purple-500 rounded-full inline-block shadow-[0_0_10px_rgba(168,85,247,0.5)]"></span>
                 Shorts Preview Panel
             </h2>
 
-            <!-- 9:16 Preview Card -->
-            <div class="relative w-full aspect-[9/16] bg-black rounded-[2rem] border-8 border-slate-800 shadow-2xl overflow-hidden flex flex-col justify-between mx-auto max-w-[360px]" id="previewCard">
-                <div id="recIndicator" class="absolute top-4 left-4 z-50 flex items-center gap-2 hidden">
+            <button id="btnPreview" onclick="renderPreview()" disabled class="w-full bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shrink-0">
+                선택한 주제 VS 결과물 보기
+            </button>
+
+            <!-- 9:16 Mobile Phone Frame Container (Padding acts as bezel) -->
+            <div class="relative w-full max-w-[360px] mx-auto bg-slate-900 p-3 rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-700" id="mobilePhoneFrame">
+                
+                <!-- Notch -->
+                <div class="absolute top-3 inset-x-0 h-6 flex justify-center z-50 pointer-events-none">
+                    <div class="w-1/3 h-full bg-slate-900 rounded-b-xl flex items-end justify-center pb-1">
+                        <div class="w-1/4 h-1 bg-slate-700 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- 9:16 Preview Card (Actual target for html2canvas, perfectly 9:16) -->
+                <div class="relative w-full aspect-[9/16] bg-black rounded-[1.5rem] flex flex-col justify-between overflow-hidden z-10 shadow-inner" id="previewCard">
+
+                <!-- YouTube Shorts UI Overlay (Not recorded) -->
+                <div class="absolute top-3 bottom-3 left-3 right-3 z-40 pointer-events-none flex flex-col justify-between pb-4 hidden" id="mobileOverlayUI">
+                    <div class="flex-1"></div>
+                    <div class="px-3 flex items-end justify-between">
+                        <div class="flex flex-col gap-2 max-w-[75%]">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-indigo-500 border border-white flex items-center justify-center text-xs font-bold text-white shadow-md">VS</div>
+                                <span class="text-white text-sm font-bold drop-shadow-md">@vs_shorts</span>
+                                <span class="bg-white text-black px-2 py-0.5 rounded-full text-[10px] font-bold shadow-md">구독</span>
+                            </div>
+                            <p class="text-white text-xs font-medium leading-snug drop-shadow-md line-clamp-2" id="uiOverlayTitle">
+                                자동 생성된 핫이슈 제목이 여기에 표시됩니다.
+                            </p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-white/90 text-[10px] bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-sm flex items-center gap-1">🎵 오리지널 오디오</span>
+                            </div>
+                        </div>
+
+                        <!-- Right icons -->
+                        <div class="flex flex-col items-center gap-4 mb-2 pr-1">
+                            <div class="flex flex-col items-center gap-1"><span class="text-2xl drop-shadow-md">🤍</span><span class="text-white text-[10px] font-bold drop-shadow-md">1.2만</span></div>
+                            <div class="flex flex-col items-center gap-1"><span class="text-2xl drop-shadow-md">💬</span><span class="text-white text-[10px] font-bold drop-shadow-md">342</span></div>
+                            <div class="flex flex-col items-center gap-1"><span class="text-2xl drop-shadow-md">↗️</span><span class="text-white text-[10px] font-bold drop-shadow-md">공유</span></div>
+                            <div class="flex flex-col items-center gap-1"><span class="text-2xl drop-shadow-md">🔄</span><span class="text-white text-[10px] font-bold drop-shadow-md">리믹스</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REC Indicator (Moved to top-right of the inner frame) -->
+                <div id="recIndicator" class="absolute top-8 left-6 z-50 flex items-center gap-2 hidden pointer-events-none">
                     <div class="w-3 h-3 bg-red-500 rounded-full rec-indicator shadow-[0_0_10px_rgba(239,68,68,1)]"></div>
                     <span class="text-white text-xs font-bold tracking-widest drop-shadow-md">REC</span>
                 </div>
 
-                <div id="emptyPreview" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-8 text-center bg-slate-900 z-20">
+                    <div id="emptyPreview" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-8 text-center bg-slate-900 z-20">
                     <p class="text-sm font-medium">리스트에서 항목을 선택하고<br><strong class="text-slate-300">결과물 보기</strong> 버튼을 누르세요.</p>
                 </div>
 
-                <div id="activePreview" class="absolute inset-0 flex flex-col hidden bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center">
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90"></div>
-                    <div class="relative z-10 pt-16 px-4 text-center">
-                        <h3 class="text-[2.5rem] font-black text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,0.6)] leading-tight tracking-tighter">
-                            기적을<br>만들어보자
-                        </h3>
+                <div id="vsPreview" class="absolute inset-0 flex flex-col hidden bg-[#f6f4ed] overflow-hidden font-['Jua']">
+                    <!-- AI Generated Background -->
+                    <img id="aiBgVS" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden opacity-80 mix-blend-multiply">
+                    
+                    <!-- 종이 질감을 위한 미세 노이즈 패턴 (CSS) -->
+                    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+                    
+                    <!-- 잎사귀/꽃 장식 -->
+                    <div class="absolute top-[-10px] left-[-10px] text-5xl opacity-80 rotate-45">🌿</div>
+                    <div class="absolute top-2 right-2 text-4xl opacity-80 -rotate-12">🌸</div>
+
+                    <!-- 상단 헤더 -->
+                    <div class="relative z-10 pt-12 px-4 w-full break-keep">
+                        <div class="flex items-center justify-start gap-2 mb-1 w-full text-left">
+                            <span class="text-[2.2rem] animate-pulse drop-shadow-md shrink-0">✨</span>
+                            <div class="relative inline-block w-full">
+                                <h3 id="listPreviewTitle" class="text-[1.8rem] text-slate-800 tracking-tight leading-tight z-10 relative">
+                                    <!-- 제목이 동적으로 들어감 -->
+                                </h3>
+                                <!-- 노란색 형광펜 밑줄 -->
+                                <svg class="absolute -bottom-1 left-0 w-full h-3 z-0 opacity-60" preserveAspectRatio="none" viewBox="0 0 100 10">
+                                    <path d="M0 5 Q 50 8 100 2" stroke="#fcd34d" stroke-width="8" fill="none" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- 별 그리기 -->
+                        <div class="absolute right-6 top-24 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
                     </div>
-                    <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 w-full mt-4">
-                        <p id="previewCategory" class="text-[0.65rem] font-black bg-white/10 border border-white/20 px-3 py-1.5 rounded-full mb-8 tracking-[0.2em] uppercase text-slate-300 backdrop-blur-md"></p>
-                        <div class="w-full flex justify-between items-center px-2 mb-10">
-                            <div class="w-[42%] text-center"><h4 id="previewA" class="text-xl md:text-2xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)] break-keep leading-tight"></h4></div>
-                            <div class="w-[16%] text-center"><span class="text-2xl font-black italic text-white opacity-90 drop-shadow-md">VS</span></div>
-                            <div class="w-[42%] text-center"><h4 id="previewB" class="text-xl md:text-2xl font-black text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.5)] break-keep leading-tight"></h4></div>
-                        </div>
-                        <div class="w-full px-2 mb-4">
-                            <div class="flex justify-between text-sm font-black mb-3">
-                                <span id="valA" class="text-blue-400 text-lg">0</span><span id="valB" class="text-red-400 text-lg">0</span>
+
+                    <!-- 메인 아이템 -->
+                    <div class="relative z-10 flex-1 flex flex-col justify-center px-5 w-full mt-2 gap-4">
+                        
+                        <!-- 아이템 A -->
+                        <div class="w-full bg-white rounded-2xl p-4 shadow-[0_4px_10px_rgba(0,0,0,0.05)] border-2 border-slate-200 relative">
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center justify-center w-6 h-6 rounded-full text-blue-600 border-2 border-blue-600 text-sm font-bold bg-white">①</span>
+                                <h4 id="previewA" class="text-xl text-slate-800 tracking-tight leading-none pt-1"></h4>
                             </div>
-                            <div class="w-full h-5 bg-slate-900 rounded-full overflow-hidden flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] border border-white/10">
-                                <div id="barA" class="progress-bar h-full bg-gradient-to-r from-blue-700 to-blue-400" style="width: 0%"></div>
-                                <div id="barB" class="progress-bar h-full bg-gradient-to-l from-red-700 to-red-400" style="width: 0%"></div>
-                            </div>
+                            <p class="text-slate-500 mt-2 pl-8 text-xs font-['Nanum_Pen_Script'] text-xl">가치 지표: <span id="valA" class="text-blue-500"></span></p>
+                            <!-- 장식 아이콘 -->
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[2.5rem] drop-shadow-md">🚀</div>
                         </div>
-                        <div class="mt-auto pb-10 w-full px-4">
-                            <p id="previewTitle" class="text-center text-sm text-slate-200 font-medium leading-relaxed bg-black/50 p-3 rounded-xl border border-white/10 backdrop-blur-md"></p>
+
+                        <!-- VS 뱃지 -->
+                        <div class="relative w-full flex justify-center -my-3 z-20">
+                            <div class="bg-red-500 text-white px-3 py-1 rounded-full text-lg border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.2)] rotate-[-8deg] font-black tracking-widest">VS</div>
+                        </div>
+
+                        <!-- 아이템 B -->
+                        <div class="w-full bg-white rounded-2xl p-4 shadow-[0_4px_10px_rgba(0,0,0,0.05)] border-2 border-slate-200 relative">
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center justify-center w-6 h-6 rounded-full text-red-600 border-2 border-red-600 text-sm font-bold bg-white">②</span>
+                                <h4 id="previewB" class="text-xl text-slate-800 tracking-tight leading-none pt-1"></h4>
+                            </div>
+                            <p class="text-slate-500 mt-2 pl-8 text-xs font-['Nanum_Pen_Script'] text-xl">가치 지표: <span id="valB" class="text-red-500"></span></p>
+                            <!-- 장식 아이콘 -->
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[2.5rem] drop-shadow-md">🏢</div>
+                        </div>
+
+                        <!-- 프로그레스 바 영역 -->
+                        <div class="w-full mt-4 px-1">
+                            <div class="flex justify-between font-['Nanum_Pen_Script'] text-xl mb-1 px-1">
+                                <span class="text-blue-600 font-bold" id="pctA">0%</span>
+                                <span class="text-red-600 font-bold" id="pctB">0%</span>
+                            </div>
+                            <div class="w-full h-4 bg-white rounded-full overflow-hidden flex border-2 border-slate-300 shadow-inner">
+                                <div id="barA" class="progress-bar h-full bg-blue-400" style="width: 0%"></div>
+                                <div id="barB" class="progress-bar h-full bg-red-400" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-3 text-slate-700 bg-white/60 p-2 rounded-xl border border-dashed border-slate-300 text-sm leading-tight" id="previewTitle"></div>
+                        </div>
+                    </div>
+
+                    <!-- 하단 CTA 박스 & 고양이 -->
+                    <div class="mt-auto relative w-full pt-4">
+                        <div class="mx-4 bg-white rounded-xl p-3 shadow-md border-2 border-slate-300 flex items-center justify-between mb-[4.5rem] relative z-10">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow-sm">💬</span>
+                                <div class="text-[0.7rem] leading-snug font-['Nanum_Pen_Script'] text-lg">
+                                    댓글에 <strong class="text-red-600 text-xl font-bold bg-slate-100 px-1 rounded border border-slate-200">888</strong> 남기면<br>무료로 전체 리스트 발송!
+                                </div>
+                            </div>
+                            <div class="text-3xl animate-pulse drop-shadow-md mr-1">🎁</div>
+                        </div>
+                        
+                        <!-- 고양이 하단 -->
+                        <div class="absolute bottom-0 left-0 w-full h-[4.5rem] bg-[#3d2c23] flex items-end justify-center gap-3 text-[3rem] pb-2 overflow-hidden border-t-4 border-[#2a1d17]">
+                            <span class="translate-y-2 hover:-translate-y-1 transition-transform">🐱</span>
+                            <span class="translate-y-3 hover:-translate-y-1 transition-transform">😸</span>
+                            <span class="translate-y-1 hover:-translate-y-1 transition-transform">😻</span>
+                            <span class="translate-y-4 hover:-translate-y-1 transition-transform">😼</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="flex flex-col gap-3 mt-2">
-                <button id="btnPreview" onclick="renderPreview()" disabled class="bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg">
-                    선택한 주제 VS 결과물 보기
-                </button>
-                <div class="flex gap-2 w-full">
-                    <button id="btnPublishMock" onclick="publishYoutubeMock()" disabled class="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg text-[13px]">
-                        서버 가상 모사
-                    </button>
-                    <button id="btnPublishBrowser" onclick="publishYoutubeBrowser()" disabled class="flex-[1.5] bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 disabled:opacity-40 text-white py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(220,38,38,0.3)] flex items-center justify-center gap-1.5 text-[13px]">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                        브라우저 녹화 (방법 A)
-                    </button>
+                <div id="listPreview" class="absolute inset-0 flex flex-col hidden bg-[#f6f4ed] overflow-hidden font-['Jua']">
+                    <!-- AI Generated Background -->
+                    <img id="aiBgList" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden opacity-80 mix-blend-multiply">
+                    
+                    <!-- 미세 노이즈 패턴 (CSS) -->
+                    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+                    
+                    <!-- 잎사귀/꽃 장식 -->
+                    <div class="absolute top-[-10px] left-[-10px] text-5xl opacity-80 rotate-45">🌿</div>
+                    <div class="absolute top-2 right-2 text-4xl opacity-80 -rotate-12">🌸</div>
+
+                    <!-- 상단 헤더 -->
+                    <div class="relative z-10 pt-10 px-4 text-center w-full">
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="text-[2.2rem] animate-bounce drop-shadow-md">⏰</span>
+                            <div class="relative inline-block">
+                                <h3 id="listTitle" class="text-[1.8rem] text-green-800 tracking-tight leading-none z-10 relative"></h3>
+                                <!-- 빨간색 손그림 밑줄 -->
+                                <svg class="absolute -bottom-2 left-0 w-full h-3 z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
+                                    <path d="M0 5 Q 50 10 100 2" stroke="#dc2626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p id="listSubtitle" class="text-sm mt-3 font-['Nanum_Pen_Script'] text-2xl tracking-widest text-slate-700">다시 말하지만, <strong class="text-red-600 font-bold">목숨 걸고</strong> 이야기합니다.</p>
+                        <!-- 별 그리기 -->
+                        <div class="absolute right-4 top-20 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
+                    </div>
+
+                    <!-- 메인 아이템 리스트 (동적 렌더링) -->
+                    <div class="relative z-10 flex-1 flex flex-col justify-start px-3 w-full mt-2 gap-2 overflow-y-auto" id="listItemsContainer">
+                        <!-- Items will be injected here via app.js -->
+                    </div>
+
+                    <!-- 하단 CTA 박스 & 고양이 -->
+                    <div class="mt-auto relative w-full pt-2">
+                        <div class="mx-4 bg-white/90 rounded-xl p-2 shadow-md border-2 border-slate-300 flex items-center justify-between mb-[4.5rem] relative z-10">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow-sm">💬</span>
+                                <div class="text-[0.65rem] leading-snug font-['Nanum_Pen_Script'] text-base">
+                                    댓글에 <strong class="text-red-600 text-lg font-bold bg-slate-100 px-1 rounded border border-slate-200">888</strong> 남기면<br>무료로 전체 리스트 발송!
+                                </div>
+                            </div>
+                            <div class="text-2xl animate-pulse drop-shadow-md mr-1">🎁</div>
+                        </div>
+                        
+                        <!-- 고양이 하단 -->
+                        <div class="absolute bottom-0 left-0 w-full h-[4.5rem] bg-[#3d2c23] flex items-end justify-center gap-3 text-[3rem] pb-2 overflow-hidden border-t-4 border-[#2a1d17]">
+                            <span class="translate-y-2 hover:-translate-y-1 transition-transform">🐱</span>
+                            <span class="translate-y-3 hover:-translate-y-1 transition-transform">😸</span>
+                            <span class="translate-y-1 hover:-translate-y-1 transition-transform">😻</span>
+                            <span class="translate-y-4 hover:-translate-y-1 transition-transform">😼</span>
+                        </div>
+                    </div>
+                </div>
+                </div> <!-- End of previewCard -->
+            </div> <!-- End of mobilePhoneFrame -->
+
+            <div class="flex flex-col gap-3 mt-2 flex-1">
+
+
+                <div class="mt-2 flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span class="text-lg">✨</span> 이미지 생성 시스템 프롬프트
+                        </label>
+                        <select id="promptTemplateSelect" class="bg-slate-700/80 text-white text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none focus:border-indigo-500 max-w-[200px] truncate" onchange="handlePromptSelectChange()">
+                            <option value="">템플릿 선택 중...</option>
+                        </select>
+                    </div>
+                    <textarea id="imageSystemPrompt" class="w-full bg-slate-800/80 border border-slate-600 rounded-xl p-3 text-sm text-slate-200 h-full flex-1 resize-none focus:outline-none focus:border-indigo-500 shadow-inner min-h-[200px]" placeholder="(예시) 주제에 맞는 역동적인 일러스트를 생성해줘..."></textarea>
                 </div>
             </div>
         </div>
-    </main>
+        
 
-    <script src="app.js"></script>
+        </div> <!-- End of Workspace Split -->
+    </div> <!-- End of Main Content Area -->
+
+    <script src="/app.js?v=5"></script>
 </body>
 </html>
