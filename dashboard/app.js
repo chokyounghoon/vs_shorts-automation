@@ -1,6 +1,5 @@
-const API_BASE_URL = "http://localhost:8787"; // 백엔드 로컬 테스트 URL
-// [주의] 추후 실제 Worker가 배포되면, 아래와 같이 운영 도메인으로 변경해야 합니다.
-// const API_BASE_URL = "https://vs-shorts-automation.your-username.workers.dev";
+// 실제 운영 환경 백엔드(Worker) URL로 변경 완료
+const API_BASE_URL = "https://vs-shorts-automation.khcho0421.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
