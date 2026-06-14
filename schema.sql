@@ -57,3 +57,19 @@ INSERT OR IGNORE INTO system_prompts (id, name, prompt) VALUES
 (2, '사이버펑크 데이터 시각화 (Cyberpunk)', '당신은 SF 컨셉 아티스트입니다. 제공된 경제 지표나 뉴스를 바탕으로 사이버펑크 스타일의 데이터 시각화 이미지를 생성하기 위한 프롬프트를 작성해주세요. 네온 빛, 홀로그램, 데이터 노드, 짙은 어둠 속에서 빛나는 하이테크 요소를 활용하여 주식 시장의 흐름과 트렌드를 미래지향적으로 표현하세요.'),
 (3, '팝아트 코믹북 스타일 (Pop-Art Comic)', '당신은 팝아트 일러스트레이터입니다. 뉴스의 핵심 갈등이나 대결 구도를 미국 히어로 코믹스 스타일의 팝아트 이미지로 생성하기 위한 프롬프트를 작성해주세요. 강렬한 원색, 하프톤 도트(Halftone dots), 굵은 아웃라인, 그리고 역동적인 구도를 사용하여 주식 시장의 격동을 흥미진진하게 묘사하세요.'),
 (4, '미니멀리스트 코퍼레이트 (Minimalist)', '당신은 모던 그래픽 디자이너입니다. 제공된 뉴스의 핵심 은유를 미니멀리스트 벡터 일러스트 스타일로 생성하기 위한 프롬프트를 작성해주세요. 깔끔한 선, 플랫한 단색 배경, 제한된 세련된 색상 팔레트(Corporate memphis 스타일)를 사용하여 복잡한 뉴스를 전문적이고 심플하게 시각화하세요.');
+
+-- Stock and Market Data
+CREATE TABLE IF NOT EXISTS stock_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL,          -- 'NEWS_US', 'NEWS_KR', 'KOSPI', 'KOSDAQ', 'ETF'
+    title TEXT NOT NULL,             -- 종목명 또는 뉴스 제목
+    value TEXT,                      -- 현재가 또는 빈칸
+    change_rate TEXT,                -- 등락률 또는 빈칸
+    theme TEXT,                      -- 테마
+    us_stock TEXT,                   -- 연관 미국주식
+    fetch_date TEXT DEFAULT (date('now', 'localtime')),
+    created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_data_category ON stock_data(category);
+CREATE INDEX IF NOT EXISTS idx_stock_data_fetch_date ON stock_data(fetch_date);

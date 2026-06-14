@@ -40,6 +40,12 @@
             <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-llm" onclick="switchTab('page-llm', this)">
                 <span class="text-xl">🤖</span> AI 쇼츠 대장간
             </button>
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-sports" onclick="switchTab('page-sports', this)">
+                <span class="text-xl">🏆</span> 스포츠 전적 비교
+            </button>
+            <button class="nav-btn flex items-center gap-3 w-full p-3 rounded-xl text-left hover:bg-white/10 transition-colors text-slate-400 font-medium" data-target="page-trends" onclick="switchTab('page-trends', this)">
+                <span class="text-xl">🔥</span> 통합 실시간 트렌드
+            </button>
         </nav>
     </aside>
 
@@ -131,49 +137,129 @@
         </div> <!-- End of Shorts Factory Page -->
 
         <!-- ==================== STOCK MARKET PAGE ==================== -->
-        <div id="page-stock" class="page-section absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 hidden">
-            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
-                <div>
-                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 tracking-tight">
-                        전일 주식 시황 요약 📈
-                    </h1>
-                    <p class="text-slate-400 text-sm mt-1">AI-powered Global & Local Market Summary</p>
+        <div id="page-stock" class="page-section absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 hidden bg-slate-900">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col justify-between items-start gap-4 shrink-0 border-l-4 border-emerald-500">
+                <div class="flex flex-col md:flex-row justify-between w-full items-start md:items-center gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 tracking-tight">
+                            전일 주식 시황 및 종목 현황 📈
+                        </h1>
+                        <p class="text-slate-400 text-sm mt-1">뉴스 및 KOSPI, KOSDAQ, ETF 상위 종목 수집</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="stockDate" class="bg-slate-800/80 border border-slate-600 text-white px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500" />
+                        <button id="btnSyncStock" onclick="syncStockData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] flex items-center gap-2 shrink-0">
+                            🔄 DB 동기화
+                        </button>
+                        <button id="btnSyncNews" onclick="retryNewsSync()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] flex items-center gap-2 shrink-0">
+                            📰 뉴스 동기화
+                        </button>
+                        <button id="btnFetchStock" onclick="loadStockData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2 shrink-0">
+                            조회하기
+                        </button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <input type="date" id="stockDate" class="bg-slate-800/80 border border-slate-600 text-white px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500" />
-                    <button id="btnFetchStock" onclick="fetchStockNews()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2 shrink-0">
-                        시황 조회하기
+
+                <!-- Sub-tabs for Stock Data -->
+                <div class="flex items-center gap-2 w-full overflow-x-auto pb-1 scrollbar-hide border-t border-slate-700/50 pt-4">
+                    <button onclick="switchStockTab('news')" id="tab-news" class="stock-sub-btn active shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-colors bg-emerald-500/20 text-emerald-400 border border-emerald-500/50">
+                        📰 뉴스 (US/KR)
+                    </button>
+                    <button onclick="switchStockTab('kospi')" id="tab-kospi" class="stock-sub-btn shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">
+                        🔵 KOSPI 전체
+                    </button>
+                    <button onclick="switchStockTab('kosdaq')" id="tab-kosdaq" class="stock-sub-btn shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">
+                        🔴 KOSDAQ 전체
+                    </button>
+                    <button onclick="switchStockTab('etf')" id="tab-etf" class="stock-sub-btn shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">
+                        📊 ETF 전체
                     </button>
                 </div>
             </header>
 
-            <main class="flex-1 glass rounded-2xl p-6 flex flex-col items-center justify-center border border-dashed border-slate-600/50 relative overflow-hidden">
+            <main class="flex-1 glass rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-700/50 relative overflow-hidden">
                 <div id="stockLoading" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
                     <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
                 </div>
                 
                 <div id="stockEmpty" class="flex flex-col items-center justify-center text-center">
                     <div class="text-6xl mb-4 animate-bounce">🚧</div>
-                    <h3 class="text-2xl text-slate-200 font-bold tracking-tight">데이터 연동 및 UI 개발 중입니다</h3>
+                    <h3 class="text-2xl text-slate-200 font-bold tracking-tight">데이터가 없습니다</h3>
                     <p class="text-slate-500 mt-3 text-center max-w-md leading-relaxed">
-                        우측 상단의 날짜를 선택하고 <strong>시황 조회하기</strong> 버튼을 눌러 뉴스 목록을 확인해보세요.
+                        최초 실행 시 <strong>DB 동기화</strong> 버튼을 눌러 데이터를 수집하거나 <strong>조회하기</strong> 버튼을 누르세요.
                     </p>
                 </div>
 
-                <div id="stockContent" class="w-full h-full hidden grid grid-cols-1 xl:grid-cols-2 gap-6 overflow-hidden">
-                    <!-- US Stock News -->
-                    <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
-                        <h3 class="text-xl font-bold text-slate-200 mb-0 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 flex items-center gap-2 border-b border-slate-700/50 rounded-t-2xl"><span class="text-2xl">🇺🇸</span> 미국 증시 뉴스</h3>
-                        <div class="overflow-y-auto flex-1 p-4">
-                            <ul id="stockListUS" class="flex flex-col gap-3"></ul>
-                        </div>
+                <div id="stockContent" class="w-full h-full hidden flex flex-col gap-4 overflow-hidden">
+                    <div class="flex justify-between items-center shrink-0">
+                        <p class="text-slate-300 text-sm">항목을 선택하여 결과물을 생성하세요.</p>
+                        <button onclick="generateStockContent()" id="btnGenerateStock" class="bg-slate-700 opacity-40 text-white px-5 py-2 rounded-lg font-bold transition-all text-sm flex items-center gap-2" disabled>
+                            <span>✨</span> 선택 항목으로 쇼츠 결과물 보기
+                        </button>
                     </div>
                     
-                    <!-- KR Stock News -->
-                    <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
-                        <h3 class="text-xl font-bold text-slate-200 mb-0 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 flex items-center gap-2 border-b border-slate-700/50 rounded-t-2xl"><span class="text-2xl">🇰🇷</span> 한국 증시 뉴스</h3>
-                        <div class="overflow-y-auto flex-1 p-4">
-                            <ul id="stockListKR" class="flex flex-col gap-3"></ul>
+                    <!-- Grid Layout for 1. List, 2. News -->
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 overflow-hidden">
+                        
+                        <!-- Grid 1 (Left): Tab Contents -->
+                        <div class="flex flex-col gap-4 overflow-hidden relative">
+                            <!-- News Tab Content -->
+                            <div id="content-news" class="stock-tab-content flex-1 grid grid-cols-1 xl:grid-cols-2 gap-4 overflow-hidden">
+                                <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                                    <div class="sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 border-b border-slate-700/50 rounded-t-2xl flex justify-between items-center">
+                                        <h3 class="text-xl font-bold text-slate-200 mb-0">🇺🇸 미국 증시</h3>
+                                        <button onclick="retryNewsSync()" class="text-xs bg-slate-700 hover:bg-emerald-600 text-white px-2 py-1 rounded transition-colors" title="뉴스만 다시 수집하여 DB에 저장합니다">🔄 뉴스 재수집</button>
+                                    </div>
+                                    <div class="overflow-y-auto flex-1 p-4"><ul id="stockListUS" class="flex flex-col gap-3"></ul></div>
+                                </div>
+                                <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                                    <div class="sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 border-b border-slate-700/50 rounded-t-2xl flex justify-between items-center">
+                                        <h3 class="text-xl font-bold text-slate-200 mb-0">🇰🇷 한국 증시</h3>
+                                        <button onclick="retryNewsSync()" class="text-xs bg-slate-700 hover:bg-emerald-600 text-white px-2 py-1 rounded transition-colors" title="뉴스만 다시 수집하여 DB에 저장합니다">🔄 뉴스 재수집</button>
+                                    </div>
+                                    <div class="overflow-y-auto flex-1 p-4"><ul id="stockListKR" class="flex flex-col gap-3"></ul></div>
+                                </div>
+                            </div>
+
+                            <!-- KOSPI Tab Content -->
+                            <div id="content-kospi" class="stock-tab-content flex-1 hidden flex-col overflow-hidden">
+                                <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                                    <div class="overflow-y-auto flex-1 p-4"><ul id="stockListKOSPI" class="flex flex-col gap-3"></ul></div>
+                                </div>
+                            </div>
+
+                            <!-- KOSDAQ Tab Content -->
+                            <div id="content-kosdaq" class="stock-tab-content flex-1 hidden flex-col overflow-hidden">
+                                <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                                    <div class="overflow-y-auto flex-1 p-4"><ul id="stockListKOSDAQ" class="flex flex-col gap-3"></ul></div>
+                                </div>
+                            </div>
+
+                            <!-- ETF Tab Content -->
+                            <div id="content-etf" class="stock-tab-content flex-1 hidden flex-col overflow-hidden">
+                                <div class="flex-1 flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40">
+                                    <div class="overflow-y-auto flex-1 p-4"><ul id="stockListETF" class="flex flex-col gap-3"></ul></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grid 2 (Right): Related News -->
+                        <div class="flex flex-col h-full overflow-hidden border border-emerald-500/30 rounded-2xl bg-slate-800/40 relative shadow-[0_0_20px_rgba(16,185,129,0.05)]">
+                            <h3 class="text-lg font-bold text-slate-200 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 border-b border-slate-700/50 rounded-t-2xl flex items-center justify-between shrink-0">
+                                관련 뉴스
+                                <span id="relatedNewsTarget" class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded truncate max-w-[150px]">선택 안됨</span>
+                            </h3>
+                            <div class="overflow-y-auto flex-1 p-4 relative">
+                                <ul id="relatedNewsList" class="flex flex-col gap-3">
+                                    <li class="text-slate-400 text-center text-sm py-8 px-4 leading-relaxed">
+                                        좌측에서 종목을 <strong>클릭</strong>하면<br>실시간 관련 뉴스가 여기에 표시됩니다.
+                                    </li>
+                                </ul>
+                                <!-- Loading overlay for news -->
+                                <div id="relatedNewsLoading" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-10">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,6 +331,168 @@
                 </div>
             </main>
         </div> <!-- End of LLM Studio Page -->
+        <!-- ==================== SPORTS MATCH PAGE ==================== -->
+        <div id="page-sports" class="page-section hidden absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 bg-slate-900">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 shrink-0 border-l-4 border-blue-500">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400 tracking-tight">
+                        스포츠 전적 비교 인포그래픽 🏆
+                    </h1>
+                    <p class="text-slate-400 text-sm mt-1">Extract Opta Analyst data and generate VS visualizations</p>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col xl:flex-row gap-6 min-h-[600px] overflow-hidden">
+                <!-- 1. Team Settings -->
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col gap-5 shadow-xl border border-slate-700/50">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2 border-b border-slate-700/50 pb-2">
+                        <span class="bg-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
+                        팀 설정
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Team A -->
+                        <div class="flex flex-col gap-2 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                            <label class="text-sm font-semibold text-blue-400">Team A (좌측)</label>
+                            <input type="text" id="teamAName" value="대한민국" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-slate-400">테마색:</label>
+                                <input type="color" id="teamAColor" value="#1e3a8a" class="w-full h-8 rounded cursor-pointer bg-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Team B -->
+                        <div class="flex flex-col gap-2 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                            <label class="text-sm font-semibold text-red-400">Team B (우측)</label>
+                            <input type="text" id="teamBName" value="일본" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-red-500 outline-none">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-slate-400">테마색:</label>
+                                <input type="color" id="teamBColor" value="#991b1b" class="w-full h-8 rounded cursor-pointer bg-transparent">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Data Parsing -->
+                <div class="flex-[1.5] glass rounded-2xl p-6 flex flex-col gap-4 shadow-xl border border-slate-700/50 relative">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2 border-b border-slate-700/50 pb-2">
+                        <span class="bg-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> 
+                        원본 데이터 파싱 (LLM)
+                    </h2>
+                    <p class="text-xs text-slate-400">Opta Analyst 등에서 복사한 영어 텍스트를 그대로 붙여넣으세요. AI가 라운드명(32강, 16강 등)과 확률을 추출합니다.</p>
+                    <textarea id="sportsRawData" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-300 text-sm focus:outline-none focus:border-indigo-500 resize-none font-mono" placeholder="예:&#10;Round of 16 70.62% 29.38%&#10;Quarter-finals 40.1% 59.9%&#10;Semi-finals 20% 80%"></textarea>
+                    
+                    <button id="btnParseSports" onclick="parseSportsData()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-4 rounded-xl text-md font-bold transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] flex items-center justify-center gap-2">
+                        <span class="text-xl">📊</span> 데이터 파싱 및 인포그래픽 적용
+                    </button>
+                </div>
+            </main>
+        </div> <!-- End of Sports Match Page -->
+
+        <!-- ==================== TRENDS PAGE ==================== -->
+        <div id="page-trends" class="page-section hidden absolute inset-0 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 bg-slate-900">
+            <header class="glass rounded-2xl p-6 shadow-lg flex flex-col justify-between items-start gap-4 shrink-0 border-l-4 border-orange-500">
+                <div class="flex flex-col md:flex-row justify-between w-full items-start md:items-center gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500 tracking-tight flex items-center gap-2">
+                            통합 실시간 핫트렌드 🔥
+                        </h1>
+                        <p class="text-slate-400 text-sm mt-1">구글 트렌드, 시그널비즈, 네이트, 네이버 실시간 키워드 통합 조회</p>
+                    </div>
+                </div>
+                
+                <!-- Sub-tabs for sources -->
+                <div class="flex items-center gap-2 w-full overflow-x-auto pb-2 scrollbar-hide border-t border-slate-700/50 pt-4 px-2">
+                    <div class="flex items-center gap-2 border-r border-slate-700/50 pr-4 mr-2">
+                        <span class="text-xs font-bold text-slate-500 shrink-0">통합 포털</span>
+                        <button onclick="fetchTrends('google')" class="trend-source-btn active shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-orange-500/20 text-orange-400 border border-orange-500/50">🌐 구글</button>
+                        <button onclick="fetchTrends('signal')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">📶 시그널</button>
+                        <button onclick="fetchTrends('nate')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">🔴 네이트</button>
+                        <button onclick="fetchTrends('naver')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">🟢 네이버</button>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 border-r border-slate-700/50 pr-4 mr-2">
+                        <span class="text-xs font-bold text-slate-500 shrink-0">커뮤니티</span>
+                        <button onclick="fetchTrends('dcinside')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">🔵 디시</button>
+                        <button onclick="fetchTrends('fmkorea')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">에펨코리아</button>
+                        <button onclick="fetchTrends('inven')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">인벤</button>
+                        <button onclick="fetchTrends('blind')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">블라인드</button>
+                    </div>
+
+                    <div class="flex items-center gap-2 border-r border-slate-700/50 pr-4 mr-2">
+                        <span class="text-xs font-bold text-slate-500 shrink-0">데이터/뉴스</span>
+                        <button onclick="fetchTrends('sometrend')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">썸트렌드</button>
+                        <button onclick="fetchTrends('vibe')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">바이브</button>
+                        <button onclick="fetchTrends('bigkinds')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">빅카인즈</button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500 shrink-0">스포츠</span>
+                        <button onclick="fetchTrends('opta')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">Opta</button>
+                        <button onclick="fetchTrends('fotmob')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">FotMob</button>
+                        <button onclick="fetchTrends('sofascore')" class="trend-source-btn shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent">SofaScore</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 glass rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-700/50 relative overflow-hidden">
+                <div id="trendsLoading" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+                </div>
+                
+                <div id="trendsEmpty" class="flex flex-col items-center justify-center text-center">
+                    <div class="text-6xl mb-4 animate-bounce">🔥</div>
+                    <h3 class="text-2xl text-slate-200 font-bold tracking-tight">트렌드 데이터가 없습니다</h3>
+                    <p class="text-slate-500 mt-3 text-center max-w-md leading-relaxed">
+                        상단의 카테고리 버튼을 눌러 실시간 급상승 키워드를 확인하세요.
+                    </p>
+                </div>
+
+                <div id="trendsContent" class="w-full h-full hidden flex flex-col overflow-hidden gap-4">
+                    <div class="flex justify-between items-center shrink-0">
+                        <p class="text-slate-300 text-sm">트렌드 키워드를 선택하세요. (1~2개 선택 시 VS 구도, 3개 이상 선택 시 리스트 구도로 자동 생성됩니다)</p>
+                        <button onclick="generateTrendsContent()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg font-bold transition-all text-sm flex items-center gap-2">
+                            <span>✨</span> 선택 항목으로 쇼츠 결과물 보기
+                        </button>
+                    </div>
+                    
+                    <!-- Grid Layout for 1. List, 2. News -->
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 overflow-hidden">
+                        
+                        <!-- Grid 1 (Left): Trends List -->
+                        <div class="flex flex-col h-full overflow-hidden border border-slate-700/50 rounded-2xl bg-slate-900/40 relative">
+                            <h3 class="text-xl font-bold text-slate-200 mb-0 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 border-b border-slate-700/50 rounded-t-2xl flex items-center gap-2">
+                                📊 <span id="currentTrendTitle">구글 트렌드 목록</span>
+                            </h3>
+                            <div class="overflow-y-auto flex-1 p-4">
+                                <ul id="trendsList" class="flex flex-col gap-2"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Grid 2 (Right): Related News -->
+                        <div class="flex flex-col h-full overflow-hidden border border-orange-500/30 rounded-2xl bg-slate-800/40 relative shadow-[0_0_20px_rgba(249,115,22,0.05)]">
+                            <h3 class="text-lg font-bold text-slate-200 sticky top-0 bg-slate-800/90 backdrop-blur-md px-4 py-3 z-10 border-b border-slate-700/50 rounded-t-2xl flex items-center justify-between shrink-0">
+                                📰 관련 뉴스
+                                <span id="trendRelatedNewsTarget" class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded truncate max-w-[150px]">선택 안됨</span>
+                            </h3>
+                            <div class="overflow-y-auto flex-1 p-4 relative">
+                                <ul id="trendRelatedNewsList" class="flex flex-col gap-2">
+                                    <li class="text-slate-400 text-center text-sm py-8 px-4 leading-relaxed">
+                                        좌측에서 키워드를 <strong>클릭</strong>하면<br>해당 키워드의 실시간 뉴스가 여기에 표시됩니다.
+                                    </li>
+                                </ul>
+                                <!-- Loading overlay for news -->
+                                <div id="trendRelatedNewsLoading" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-10">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div> <!-- End of Google Trends Page -->
+
         </div> <!-- End of Dynamic Tabs Area -->
 
         <!-- Right Column -->
@@ -309,31 +557,29 @@
                     <p class="text-sm font-medium">리스트에서 항목을 선택하고<br><strong class="text-slate-300">결과물 보기</strong> 버튼을 누르세요.</p>
                 </div>
 
-                <div id="vsPreview" class="absolute inset-0 flex flex-col hidden bg-[#f6f4ed] overflow-hidden font-['Jua']">
+                <div id="vsPreview" class="absolute inset-0 flex flex-col hidden bg-black overflow-hidden font-['Jua']">
                     <!-- AI Generated Background -->
-                    <img id="aiBgVS" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden opacity-80 mix-blend-multiply">
+                    <img id="aiBgVS" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden">
                     
                     <!-- 종이 질감을 위한 미세 노이즈 패턴 (CSS) -->
                     <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
-                    
-                    <!-- 잎사귀/꽃 장식 -->
-                    <div class="absolute top-[-10px] left-[-10px] text-5xl opacity-80 rotate-45">🌿</div>
-                    <div class="absolute top-2 right-2 text-4xl opacity-80 -rotate-12">🌸</div>
+
 
                     <!-- 상단 헤더 -->
-                    <div class="relative z-10 pt-12 px-4 w-full break-keep">
-                        <div class="flex items-center justify-start gap-2 mb-1 w-full text-left">
-                            <span class="text-[2.2rem] animate-pulse drop-shadow-md shrink-0">✨</span>
-                            <div class="relative inline-block w-full">
-                                <h3 id="listPreviewTitle" class="text-[1.8rem] text-slate-800 tracking-tight leading-tight z-10 relative">
-                                    <!-- 제목이 동적으로 들어감 -->
+                    <div class="relative z-10 pt-12 px-4 text-center w-full">
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="text-[2.5rem] animate-bounce drop-shadow-md">⏰</span>
+                            <div class="relative inline-block">
+                                <h3 class="text-[1.8rem] text-green-800 tracking-tight leading-none z-10 relative">
+                                    <span id="previewDate" class="text-[2.2rem] text-green-700"></span> 전에는 <span class="text-green-700">꼭</span> 사라!!
                                 </h3>
-                                <!-- 노란색 형광펜 밑줄 -->
-                                <svg class="absolute -bottom-1 left-0 w-full h-3 z-0 opacity-60" preserveAspectRatio="none" viewBox="0 0 100 10">
-                                    <path d="M0 5 Q 50 8 100 2" stroke="#fcd34d" stroke-width="8" fill="none" stroke-linecap="round"/>
+                                <!-- 빨간색 손그림 밑줄 -->
+                                <svg class="absolute -bottom-3 left-0 w-full h-4 z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
+                                    <path d="M0 5 Q 50 10 100 2" stroke="#dc2626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
                                 </svg>
                             </div>
                         </div>
+                        <p class="text-sm mt-5 font-['Nanum_Pen_Script'] text-2xl tracking-widest text-slate-700">다시 말하지만, <strong class="text-red-600 font-bold">목숨 걸고</strong> 이야기합니다.</p>
                         <!-- 별 그리기 -->
                         <div class="absolute right-6 top-24 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
                     </div>
@@ -404,32 +650,31 @@
                     </div>
                 </div>
 
-                <div id="listPreview" class="absolute inset-0 flex flex-col hidden bg-[#f6f4ed] overflow-hidden font-['Jua']">
+                <div id="listPreview" class="absolute inset-0 flex flex-col hidden bg-black overflow-hidden font-['Jua']">
                     <!-- AI Generated Background -->
-                    <img id="aiBgList" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden opacity-80 mix-blend-multiply">
+                    <img id="aiBgList" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden">
                     
                     <!-- 미세 노이즈 패턴 (CSS) -->
                     <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
-                    
-                    <!-- 잎사귀/꽃 장식 -->
-                    <div class="absolute top-[-10px] left-[-10px] text-5xl opacity-80 rotate-45">🌿</div>
-                    <div class="absolute top-2 right-2 text-4xl opacity-80 -rotate-12">🌸</div>
+
 
                     <!-- 상단 헤더 -->
-                    <div class="relative z-10 pt-10 px-4 text-center w-full">
-                        <div class="flex items-center justify-center gap-2 mb-1">
-                            <span class="text-[2.2rem] animate-bounce drop-shadow-md">⏰</span>
-                            <div class="relative inline-block">
-                                <h3 id="listTitle" class="text-[1.8rem] text-green-800 tracking-tight leading-none z-10 relative"></h3>
-                                <!-- 빨간색 손그림 밑줄 -->
-                                <svg class="absolute -bottom-2 left-0 w-full h-3 z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
-                                    <path d="M0 5 Q 50 10 100 2" stroke="#dc2626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <div class="relative z-10 pt-12 px-4 w-full break-keep">
+                        <div class="flex items-center justify-start gap-2 mb-1 w-full text-left bg-white/80 p-3 rounded-2xl backdrop-blur-md shadow-lg border border-white/50">
+                            <span class="text-[2.2rem] animate-pulse drop-shadow-md shrink-0">✨</span>
+                            <div class="relative inline-block w-full">
+                                <h3 id="listTitle" class="text-[1.8rem] text-slate-800 tracking-tight leading-tight z-10 relative drop-shadow-sm font-bold">
+                                    <!-- 제목이 동적으로 들어감 -->
+                                </h3>
+
+                                <!-- 노란색 형광펜 밑줄 -->
+                                <svg class="absolute -bottom-1 left-0 w-full h-3 z-0 opacity-60" preserveAspectRatio="none" viewBox="0 0 100 10">
+                                    <path d="M0 5 Q 50 8 100 2" stroke="#fcd34d" stroke-width="8" fill="none" stroke-linecap="round"/>
                                 </svg>
                             </div>
                         </div>
-                        <p id="listSubtitle" class="text-sm mt-3 font-['Nanum_Pen_Script'] text-2xl tracking-widest text-slate-700">다시 말하지만, <strong class="text-red-600 font-bold">목숨 걸고</strong> 이야기합니다.</p>
                         <!-- 별 그리기 -->
-                        <div class="absolute right-4 top-20 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
+                        <div class="absolute right-6 top-24 text-3xl text-red-400 rotate-12 font-['Nanum_Pen_Script']">☆</div>
                     </div>
 
                     <!-- 메인 아이템 리스트 (동적 렌더링) -->
@@ -458,6 +703,48 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- NEW: Sports Preview Template -->
+                <div id="sportsPreview" class="absolute inset-0 flex flex-col hidden overflow-hidden font-['Jua'] bg-slate-900">
+                    <!-- Diagonal Split Backgrounds -->
+                    <div id="sportsBgA" class="absolute inset-0 z-0 transition-colors duration-500" style="background-color: #1e3a8a; clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
+                    <div id="sportsBgB" class="absolute inset-0 z-0 transition-colors duration-500" style="background-color: #991b1b; clip-path: polygon(100% 0, 100% 100%, 0 100%);"></div>
+                    
+                    <!-- Noise Overlay -->
+                    <div class="absolute inset-0 opacity-20 z-0 pointer-events-none mix-blend-overlay" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+                    
+                    <!-- VS Title and Teams -->
+                    <div class="relative z-10 pt-16 px-4 w-full flex flex-col items-center">
+                        <div class="flex items-center justify-between w-full mb-6 relative px-4">
+                            <!-- Team A -->
+                            <div class="flex-1 text-center flex flex-col items-center z-10">
+                                <span class="text-4xl drop-shadow-lg mb-1" id="sportsTeamAIcon">🇰🇷</span>
+                                <h3 id="sportsTeamATitle" class="text-[2rem] text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] font-bold">한국</h3>
+                            </div>
+                            
+                            <!-- VS Badge -->
+                            <div class="w-14 h-14 shrink-0 bg-white rounded-full flex items-center justify-center shadow-[0_0_25px_rgba(0,0,0,0.8)] z-20 border-4 border-slate-900 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[15deg]">
+                                <span class="text-xl font-black text-slate-900 -rotate-[15deg] italic tracking-tighter pr-1">VS</span>
+                            </div>
+
+                            <!-- Team B -->
+                            <div class="flex-1 text-center mt-12 flex flex-col items-center z-10">
+                                <h3 id="sportsTeamBTitle" class="text-[2rem] text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] font-bold">일본</h3>
+                                <span class="text-4xl drop-shadow-lg mt-1" id="sportsTeamBIcon">🇯🇵</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="bg-black/60 backdrop-blur-md px-5 py-1.5 rounded-full border border-white/20 shadow-xl mt-1 z-20">
+                            <span class="text-white text-xs tracking-widest font-sans font-bold">대회 진출 확률 예측 (OPTA)</span>
+                        </div>
+                    </div>
+
+                    <!-- Bars Container -->
+                    <div id="sportsBarsContainer" class="relative z-10 flex-1 flex flex-col justify-center px-4 w-full gap-4 pb-12 mt-4">
+                        <!-- Bars will be injected dynamically via JS -->
+                    </div>
+                </div>
                 </div> <!-- End of previewCard -->
             </div> <!-- End of mobilePhoneFrame -->
 
@@ -482,6 +769,6 @@
         </div> <!-- End of Workspace Split -->
     </div> <!-- End of Main Content Area -->
 
-    <script src="/app.js?v=5"></script>
+    <script src="/app.js?v=7"></script>
 </body>
 </html>
